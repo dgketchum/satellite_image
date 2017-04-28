@@ -27,7 +27,7 @@ setup(name='Landsat578',
       version=tag,
       description='Simple API provides a class to process satellite images',
       setup_requires=['nose>=1.0'],
-      py_modules=[],
+      py_modules=None,
       license='Apache', classifiers=[
         'Development Status :: 1 - Planning',
         'Intended Audience :: Science/Research',
@@ -38,11 +38,11 @@ setup(name='Landsat578',
       author='David Ketchum',
       author_email='dgketchum at gmail dot com',
       platforms='Posix; MacOS X; Windows',
-      packages=[],
+      packages=None,
       download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', name, tag),
       url='https://github.com/dgketchum',
-      test_suite='tests.test_suite.suite', install_requires=[],
-      entry_points=[]
+      test_suite='tests.test_suite.suite', install_requires=None,
+      entry_points=None
       )
 
-# ============= EOF ==============================================================
+# ============= EOF ===========================================================================
