@@ -1,0 +1,8 @@
+affine==2.0.0
+click==6.7
+click-plugins==1.0.3
+cligj==0.4.0
+numpy==1.12.1
+pyparsing==2.1.4
+rasterio==0.36.0
+snuggs==1.4.0

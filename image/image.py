@@ -27,7 +27,7 @@ class InvalidObjectError(TypeError):
     pass
 
 
-class SatelliteImage:
+class SatelliteImage(object):
     def __init__(self, obj):
         self.obj = obj
         self._valid_formats = ['.tif', ]
@@ -54,34 +54,35 @@ class SatelliteImage:
 
 
 class SingleImage(SatelliteImage):
+    def __init__(self, obj):
+        super().__init__(obj)
+
+        with rasterio.open(self.obj, 'r+') as r:
+            profile = r.profile
+            self.geo = profile
+
     def get_ndarray(self):
         with rasterio.open(self.obj, 'r+') as r:
             arr = r.read()
             return arr
 
-    def get_geo_attrs(self):
-        with rasterio.open(self.obj, 'r+') as r:
-            profile = r.profile
-            return profile
-
 
 class StackImage(SatelliteImage):
-
     def __init__(self, obj):
 
         super().__init__(obj)
 
         first = True
-
-        with rasterio.open(self.obj, 'r+') as r:
-            profile = r.profile
-            if first:
-                self.geo = profile
-                first = False
-            elif profile['crs'] == self.geo['crs']:
-                pass
-            else:
-                raise UnmatchedStackGeoError(ValueError)
+        for item in self.image_list:
+            with rasterio.open(os.path.join(self.obj, item), 'r+') as r:
+                profile = r.profile
+                if first:
+                    self.geo = profile
+                    first = False
+                elif profile['transform'] == self.geo['transform']:
+                    pass
+                else:
+                    raise UnmatchedStackGeoError(ValueError('This object has images of differing geometries...'))
 
     def get_numpy_stack(self):
 
@@ -98,6 +99,7 @@ class StackImage(SatelliteImage):
             stack[i] = arr
 
         return stack
+
 
 if __name__ == '__main__':
     pass

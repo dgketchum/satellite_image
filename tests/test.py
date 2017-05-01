@@ -43,6 +43,7 @@ class ImageTestCase(unittest.TestCase):
 
     def test_single_instance(self):
         s = SingleImage(self.passed_file)
+        self.assertFalse(s.isdir)
         self.assertIsInstance(s, SingleImage)
         self.assertIsNone(s.image_list)
 
@@ -52,7 +53,7 @@ class ImageTestCase(unittest.TestCase):
 
     def test_single_getgeo(self):
         s = SingleImage(self.passed_file)
-        geo = s.get_geo_attrs()
+        geo = s.geo
         self.assertIsInstance(geo, dict)
         self.assertEqual(geo['width'], 300)
 
@@ -65,12 +66,15 @@ class ImageTestCase(unittest.TestCase):
 
     def test_stack_instance(self):
         s = StackImage(self.dir_name)
+        self.assertFalse(s.isfile)
         self.assertIsInstance(s, StackImage)
 
     def test_numpy_stack(self):
         s = StackImage(self.dir_name)
         np_stack = s.get_numpy_stack()
         self.assertIsInstance(np_stack, np.ndarray)
+        self.assertEqual(np_stack.ndim, 3)
+        self.assertEqual(np_stack.shape, (7, 300, 300))
 
 
 if __name__ == '__main__':
