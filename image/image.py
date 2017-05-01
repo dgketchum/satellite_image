@@ -16,9 +16,14 @@
 
 import os
 import rasterio
+import numpy as np
 
 
-class InvalidObjectError(ValueError):
+class UnmatchedStackGeoError(ValueError):
+    pass
+
+
+class InvalidObjectError(TypeError):
     pass
 
 
@@ -33,7 +38,7 @@ class SatelliteImage:
             self.isfile = True
             self.isdir = False
         else:
-            raise InvalidObjectError(ValueError(
+            raise InvalidObjectError(TypeError(
                 'Object appears to be neither file nor directory...'))
 
         if self.isdir:
@@ -42,7 +47,7 @@ class SatelliteImage:
             for item in file_list:
                 for form in self._valid_formats:
                     if item.lower().endswith(form):
-                        self.image_list.append(obj)
+                        self.image_list.append(item)
 
         else:
             self.image_list = None
@@ -61,8 +66,38 @@ class SingleImage(SatelliteImage):
 
 
 class StackImage(SatelliteImage):
-    pass
 
+    def __init__(self, obj):
+
+        super().__init__(obj)
+
+        first = True
+
+        with rasterio.open(self.obj, 'r+') as r:
+            profile = r.profile
+            if first:
+                self.geo = profile
+                first = False
+            elif profile['crs'] == self.geo['crs']:
+                pass
+            else:
+                raise UnmatchedStackGeoError(ValueError)
+
+    def get_numpy_stack(self):
+
+        stack_list = []
+
+        for image in self.image_list:
+            with rasterio.open(os.path.join(self.obj, image), 'r+') as r:
+                arr = r.read()
+                stack_list.append(arr)
+
+        stack = np.empty((len(stack_list), self.geo['width'], self.geo['height']))
+
+        for i, arr in enumerate(stack_list):
+            stack[i] = arr
+
+        return stack
 
 if __name__ == '__main__':
     pass

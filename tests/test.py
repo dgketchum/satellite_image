@@ -16,7 +16,7 @@
 
 import unittest
 import numpy as np
-from pkg_resources import resource_listdir, resource_filename
+from pkg_resources import resource_filename
 
 from image.image import SatelliteImage, StackImage, SingleImage
 
@@ -27,7 +27,6 @@ class ImageTestCase(unittest.TestCase):
         self.valid_file = False
         self.valid_dir = False
         self.dir_name = 'tests/data'
-        self.dir_list = resource_listdir('tests', 'data')
         self.image_list = ['LT50360292007146PAC01_B1.TIF', 'LT50360292007146PAC01_B2.TIF',
                            'LT50360292007146PAC01_B3.TIF', 'LT50360292007146PAC01_B4.TIF',
                            'LT50360292007146PAC01_B5.TIF', 'LT50360292007146PAC01_B6.TIF',
@@ -66,6 +65,12 @@ class ImageTestCase(unittest.TestCase):
 
     def test_stack_instance(self):
         s = StackImage(self.dir_name)
+        self.assertIsInstance(s, StackImage)
+
+    def test_numpy_stack(self):
+        s = StackImage(self.dir_name)
+        np_stack = s.get_numpy_stack()
+        self.assertIsInstance(np_stack, np.ndarray)
 
 
 if __name__ == '__main__':
