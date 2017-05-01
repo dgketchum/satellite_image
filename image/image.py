@@ -23,8 +23,9 @@ class InvalidObjectError(ValueError):
 
 
 class SatelliteImage:
-
     def __init__(self, obj):
+        self.obj = obj
+        self._valid_formats = ['.tif', ]
         if os.path.isdir(obj):
             self.isdir = True
             self.isfile = False
@@ -35,9 +36,35 @@ class SatelliteImage:
             raise InvalidObjectError(ValueError(
                 'Object appears to be neither file nor directory...'))
 
+        if self.isdir:
+            self.image_list = []
+            file_list = os.listdir(obj)
+            for item in file_list:
+                for form in self._valid_formats:
+                    if item.lower().endswith(form):
+                        self.image_list.append(obj)
+
+        else:
+            self.image_list = None
+
+
+class SingleImage(SatelliteImage):
+    def get_ndarray(self):
+        with rasterio.open(self.obj, 'r+') as r:
+            arr = r.read()
+            return arr
+
+    def get_geo_attrs(self):
+        with rasterio.open(self.obj, 'r+') as r:
+            profile = r.profile
+            return profile
+
+
+class StackImage(SatelliteImage):
+    pass
 
 
 if __name__ == '__main__':
-    print(SatelliteImage())
+    pass
 
 # =============================================================================================
