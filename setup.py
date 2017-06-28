@@ -26,7 +26,7 @@ name = 'satellite_image'
 setup(name='Landsat578',
       version=tag,
       description='Simple API provides a class to process satellite images',
-      setup_requires=['nose>=1.0'],
+      setup_requires=[],
       py_modules=None,
       license='Apache', classifiers=[
         'Development Status :: 1 - Planning',
@@ -41,7 +41,7 @@ setup(name='Landsat578',
       packages=None,
       download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', name, tag),
       url='https://github.com/dgketchum',
-      test_suite='testsr.test_suite.suite', install_requires=None,
+      test_suite='tests.test_suite.suite', install_requires=None,
       entry_points=None
       )
 
