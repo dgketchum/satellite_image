@@ -41,7 +41,7 @@ setup(name='Landsat578',
       packages=None,
       download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', name, tag),
       url='https://github.com/dgketchum',
-      test_suite='tests.test_suite.suite', install_requires=None,
+      test_suite='testsr.test_suite.suite', install_requires=None,
       entry_points=None
       )
 

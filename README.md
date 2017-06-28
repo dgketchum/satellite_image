@@ -1,4 +1,4 @@
-# ![Landsat](tests/data/maple.png)
+# ![Landsat](testsr/data/maple.png)
 
 [![Build Status](https://travis-ci.org/dgketchum/satellite_image.svg?branch=master)](https://travis-ci.org/dgketchum/satellite_image)
 [![codecov](https://codecov.io/gh/dgketchum/satellite_image/branch/master/graph/badge.svg)](https://codecov.io/gh/dgketchum/satellite_image)
