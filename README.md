@@ -18,4 +18,4 @@ and get an object that full attributes, a bounding feature, and methods to retur
 - At satellite brightness temperature for the thermal bands.
 - Reflectance for the optical bands.
 - Albedo using the method from Smith, currently working on Tasumi.
-- Save any of these arrays as a GeoTiff
+- Save any of these arrays as a GeoTiff.
