@@ -1,0 +1,46 @@
+# This is the config file for building the Landsat578 project
+# with Travis-ci.org.
+
+dist: trusty
+sudo: required
+
+language: python
+
+python:
+ - "3.5"
+
+notifications:
+  email:
+    on_failure: change
+
+env:
+  # Default values for common packages, override as needed
+  global:
+    - PYTHON=3.5
+
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda2/bin:$PATH
+  - conda update --yes --quiet conda
+  # Build package list to avoid empty package=versions; only needed for versioned pacakges
+  - PKGS="python=${PYTHON}"
+  - PKGS="${PKGS} numpy"; if [ ${NUMPY} ]; then PKGS="${PKGS}=${NUMPY}"; fi
+  - PKGS="${PKGS} pip";
+
+install:
+  - conda create --yes --quiet -n landsatenv ${PKGS} ${OPTIONAL}
+  - source activate landsatenv
+  - conda install --yes --file requirements.yml
+  - pip install codecov coverage
+
+script:
+  - coverage run setup.py test
+
+
+notifications:
+  slack: nmbgmr:6025BpWw62bzddqVqFrtGLOF
+
+after_success:
+  - codecov
