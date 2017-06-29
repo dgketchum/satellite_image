@@ -19,7 +19,8 @@ import unittest
 
 def suite():
     print('Testing.......................................')
-    from tests.test_image import LandsatImageTestCase, Landsat5TestCase, Landsat7TestCase, Landsat8TestCase
+    from tests.test_image import LandsatImageTestCase, Landsat5TestCase, \
+        Landsat7TestCase, Landsat8TestCase
 
     loader = unittest.TestLoader()
     test_suite = unittest.TestSuite()

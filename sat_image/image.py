@@ -19,7 +19,7 @@ import shutil
 from rasterio import open as rasopen
 from numpy import where, pi, cos, nan, inf, true_divide, errstate, log, nan_to_num
 from numpy import float32, sin, deg2rad
-from shapely.geometry import Polygon, mapping, box
+from shapely.geometry import Polygon, mapping
 from fiona import open as fiopen
 from fiona.crs import from_epsg
 from tempfile import mkdtemp
@@ -93,6 +93,7 @@ class LandsatImage(object):
                 bounds = RasterBounds(affine_transform=transform,
                                       profile=profile,
                                       latlon=False)
+                setattr(self, 'shape', src.shape)
                 self.north, self.west, self.south, self.east = bounds.get_nwse_tuple()
                 self.coords = bounds.as_tuple('nsew')
 
@@ -105,6 +106,13 @@ class LandsatImage(object):
         path = self.tif_dict[band_str]
         with rasopen(path) as src:
             return src.read(1)
+
+    def bool_mask(self):
+
+        b1 = self._get_band('b1')
+        mask = where(b1 > 0, True, False)
+
+        return mask
 
     @staticmethod
     def earth_sun_d(dtime):
@@ -278,7 +286,7 @@ class Landsat5(LandsatImage):
         :return: boolean array
         """
         dn = self._get_band('b{}'.format(band))
-        mask = where((dn == value) & (self.mask > 0), True, False)
+        mask = where((dn == value) & (self.bool_mask() > 0), True, False)
 
         return mask
 
@@ -385,7 +393,7 @@ class Landsat7(LandsatImage):
         :return: boolean array
         """
         dn = self._get_band('b{}'.format(band))
-        mask = where((dn == value) & (self.mask > 0), True, False)
+        mask = where((dn == value) & (self.bool_mask() > 0), True, False)
 
         return mask
 
@@ -499,7 +507,7 @@ class Landsat8(LandsatImage):
             raise ValueError('Landsat 8 reflectance should OLI band (i.e. bands 1-8)')
 
         elev = getattr(self, 'sun_elevation')
-        dn = getattr(self, 'b{}'.format(band))
+        dn = self._get_band('b{}'.format(band))
         mr = getattr(self, 'reflectance_mult_band_{}'.format(band))
         ar = getattr(self, 'reflectance_add_band_{}'.format(band))
 
