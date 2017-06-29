@@ -21,7 +21,7 @@ and get an object that full attributes, a bounding feature, and methods to retur
 - Save any of these arrays as a GeoTiff.
 
 Given this small section of a Landsat 7 image of the S. Flathead Lake and the 
-Mission Mountians in Montana, band 5:
+Mission Mountians in Montana, ETM+ band 5:
 
 # ![satellite_image](docs/flathead_b5.png)
 
