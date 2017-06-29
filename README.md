@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
 Gives the cloud mask:
 
-<img src="docs/flathead_cloud_mask.png" alt="Drawing" style="width: 200px;"/>
+<img src="docs/flathead_cloud_mask.png" alt="Drawing" style="width: 100px;"/>
 
 the shadow mask:
 
