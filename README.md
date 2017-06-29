@@ -63,15 +63,15 @@ Gives the cloud mask:
 
 the shadow mask:
 
-# ![satellite_image](docs/flathead_shadow_mask.png)
+<img src="https://github.com/dgketchum/satellite_image/blob/master/docs/flathead_shadow_mask.png" width="400" />
 
 the water mask:
 
-# ![satellite_image](docs/flathead_water_mask.png)
+<img src="https://github.com/dgketchum/satellite_image/blob/master/docs/flathead_water_mask.png" width="400" />
 
-or a combination of all masks, leaving `False` everywhere there is clear sky:
+or a combination of all masks, leaving `0` everywhere there is clear sky:
 
-# ![satellite_image](docs/flathead_combo_mask.png)
+<img src="https://github.com/dgketchum/satellite_image/blob/master/docs/flathead_combo_mask.png" width="400" />
 
 
 ```
