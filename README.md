@@ -43,6 +43,8 @@ def fmask(image_dir, outdir):
     cloud, shadow, water = f.cloud_mask()
     combo = f.cloud_mask(combined=True)
     
+    mask.save_array(cloud, os.path.join(outdir, 'cloud_mask_l7.tif'))
+    mask.save_array(shadow, os.path.join(outdir, 'shadow_mask_l7.tif'))
     mask.save_array(water, os.path.join(outdir, 'water_mask_l7.tif'))
     mask.save_array(combo, os.path.join(outdir, 'combo_mask_l7.tif'))
     
@@ -57,7 +59,7 @@ if __name__ == '__main__':
 
 Gives the cloud mask:
 
-# ![satellite_image](docs/flathead_cloud_mask.png)
+<img src="docs/flathead_cloud_mask.png" alt="Drawing" style="width: 200px;"/>
 
 the shadow mask:
 
@@ -70,3 +72,27 @@ the water mask:
 or a combination of all masks, leaving `False` everywhere there is clear sky:
 
 # ![satellite_image](docs/flathead_combo_mask.png)
+
+
+```
+import os
+import satellite_image
+import datetime
+
+def ndvi(image_dir, outdir):
+
+    l7 = satellite_image.Landsat7(image_dir)
+    
+    ndvi = l7.ndvi()
+    date = l7.date_acquired
+    date_str = datetime.datetime.strftime(landsat.date_acquired, '%Y%m%d')
+    mask.save_array(ndvi, os.path.join(outdir, 'ndvi_l7_{}.tif'.format(date_str)))
+    
+    return None
+    
+if __name__ == '__main__':
+    out_directory = os.path.join('data', 'ndvi')
+    image_directory = os.path.join('data', 'images', 'LE70410272007125EDC00')
+    fmask(image_directory, out_directory)
+    
+```

@@ -50,6 +50,7 @@ class FmaskTestCaseL7(unittest.TestCase):
         self.assertIsInstance(self.image, Landsat7)
 
     def test_get_potential_cloud_layer(self):
+        ndvi = self.image.ndvi()
         f = Fmask(self.image)
         self.assertIsInstance(f, Fmask)
         cloud, shadow, water = f.cloud_mask()
@@ -59,9 +60,10 @@ class FmaskTestCaseL7(unittest.TestCase):
         self.assertEqual(c_ct, 133502)
         self.assertEqual(s_ct, 21960)
         self.assertEqual(w_ct, 29678)
-        # home = os.path.expanduser('~')
-        # outdir = os.path.join(home, 'images', 'sandbox')
-        # f.save_array(combo, os.path.join(outdir, 'combo_l7.tif'))
+        home = os.path.expanduser('~')
+        outdir = os.path.join(home, 'images', 'sandbox')
+        f.save_array(ndvi, os.path.join(outdir, 'ndvi.tif'))
+
 
 class FmaskTestCaseL8(unittest.TestCase):
     def setUp(self):

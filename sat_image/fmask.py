@@ -608,8 +608,8 @@ class Fmask(object):
 
     def save_array(self, array, outfile):
         georeference = self.image.rasterio_geometry
+        georeference['dtype'] = array.dtype
         array = array.reshape(1, array.shape[0], array.shape[1])
-        array = np.array(array, dtype=georeference['dtype'])
         with rasterio.open(outfile, 'w', **georeference) as dst:
             dst.write(array)
         return None

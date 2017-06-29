@@ -19,6 +19,7 @@ import unittest
 import numpy as np
 import rasterio
 from rasterio.transform import Affine
+from datetime import date
 
 from sat_image.image import LandsatImage, Landsat5, Landsat7, Landsat8
 
@@ -39,6 +40,10 @@ class LandsatImageTestCase(unittest.TestCase):
                          [(367035.0, 5082585.0),
                           (388845.0, 5082585.0), (388845.0, 5060775.0),
                           (367035.0, 5060775.0), (367035.0, 5082585.0)])
+
+    def test_date(self):
+        landsat = LandsatImage(self.dir_name_LT5)
+        self.assertEqual(date(2006, 7, 6), landsat.date_acquired)
 
 
 class Landsat5TestCase(unittest.TestCase):
@@ -172,10 +177,14 @@ class Landsat7TestCase(unittest.TestCase):
         self.assertTrue(red_mask[red_sat_cell])
 
     def test_ndvi(self):
-        ndvi = self.l7.ndvi()[self.cell]
+        ndvi = self.l7.ndvi()
+        ndvi_cell = ndvi[self.cell]
         b4, b3 = self.l7.reflectance(4)[self.cell], self.l7.reflectance(3)[self.cell]
         ndvi_exp = (b4 - b3) / (b4 + b3)
-        self.assertEqual(ndvi, ndvi_exp)
+        self.assertEqual(ndvi_cell, ndvi_exp)
+        home = os.path.expanduser('~')
+        outdir = os.path.join(home, 'images', 'sandbox')
+        self.l7.save_array(ndvi, os.path.join(outdir, 'ndvi.tif'))
 
     def test_ndsi(self):
         ndsi = self.l7.ndsi()[self.cell]
