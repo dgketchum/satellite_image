@@ -39,7 +39,7 @@ def fmask(image_dir, outdir):
 
     l7 = satellite_image.Landsat7(image_dir)
     
-    f = Fmask(l7)
+    f = satellite_image.Fmask(l7)
     cloud, shadow, water = f.cloud_mask()
     combo = f.cloud_mask(combined=True)
     
