@@ -9,9 +9,9 @@ language: python
 python:
  - "3.5"
 
-notifications:
-  email:
-    on_failure: change
+#notifications:
+#  email:
+#    on_failure: change
 
 env:
   # Default values for common packages, override as needed
