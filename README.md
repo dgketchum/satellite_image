@@ -15,7 +15,13 @@ and get an object that full attributes, a bounding feature, and methods to retur
 
 - Fmask cloudmask, water mask, shadow mask, or combination mask.
 - NDVI, NDSI; Normalized difference vegetation density, snow density.
-- At satellite brightness temperature for the thermal bands.
+- At satellite brightness temperature for thermal bands.
 - Reflectance for the optical bands.
 - Albedo using the method from Smith, currently working on Tasumi.
 - Save any of these arrays as a GeoTiff.
+
+Given this small section of a Landsat 7 image of the S. Flathead Lake and the 
+Mission Mountians in Montana, band 5:
+
+# ![satellite_image](docs/flathead_b5.png)
+
