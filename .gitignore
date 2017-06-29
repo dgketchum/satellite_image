@@ -87,3 +87,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
+/.travis.yml
+.idea/misc.xml
+.idea/modules.xml
+.idea/satellite_image.iml
+.idea/workspace.xml

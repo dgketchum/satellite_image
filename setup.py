@@ -23,7 +23,7 @@ os.environ['TRAVIS_CI'] = 'True'
 tag = '0.0.1'
 name = 'satellite_image'
 
-setup(name='Landsat578',
+setup(name=name,
       version=tag,
       description='Simple API provides a class to process satellite images',
       setup_requires=[],

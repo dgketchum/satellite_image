@@ -19,13 +19,13 @@ import unittest
 import numpy as np
 import rasterio
 
-from sat_image.image import LandsatImage, Landsat5, Landsat7, Landsat8
+from image.image import LandsatImage, Landsat5, Landsat7, Landsat8
 
 
 class LandsatImageTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.dir_name_LT5 = 'testsr/data/image_test/lc8_image'
+        self.dir_name_LT5 = 'tests/data/image_test/lc8_image'
 
     def test_earth_sun(self):
         landsat = LandsatImage(self.dir_name_LT5)
@@ -40,10 +40,10 @@ class LandsatImageTestCase(unittest.TestCase):
 
 class Landsat5TestCase(unittest.TestCase):
     def setUp(self):
-        self.dir_name_LT5 = 'testsr/data/image_test/lt5_image'
+        self.dir_name_LT5 = 'tests/data/image_test/lt5_image'
         # results from fmask.exe
         # bitbucket.org/chchrsc/python-fmask/
-        self.exp_reflect = 'testsr/data/image_test/lt5_image/LT5_reflct_10000x_b1.tif'
+        self.exp_reflect = 'tests/data/image_test/lt5_image/LT5_reflct_10000x_b1.tif'
         self.l5 = Landsat5(self.dir_name_LT5)
         self.cell = 150, 150
 
@@ -118,8 +118,8 @@ class Landsat7TestCase(unittest.TestCase):
     def setUp(self):
         # results from fmask.exe
         # bitbucket.org/chchrsc/python-fmask/
-        self.dir_name_LT7 = 'testsr/data/image_test/le7_image'
-        self.exp_reflect = 'testsr/data/image_test/le7_image/LE7_reflct_10000x_b1.tif'
+        self.dir_name_LT7 = 'tests/data/image_test/le7_image'
+        self.exp_reflect = 'tests/data/image_test/le7_image/LE7_reflct_10000x_b1.tif'
         self.l7 = Landsat7(self.dir_name_LT7)
         self.cell = 300, 300
 
@@ -181,7 +181,7 @@ class Landsat7TestCase(unittest.TestCase):
 
 class Landsat8TestCase(unittest.TestCase):
     def setUp(self):
-        self.dirname_cloud = 'testsr/data/image_test/lc8_image'
+        self.dirname_cloud = 'tests/data/image_test/lc8_image'
         # results from rio-toa
         self.ex_bright = os.path.join(self.dirname_cloud, 'LC8_brightemp_B10.TIF')
         self.ex_reflect = os.path.join(self.dirname_cloud, 'LC8_reflct_B1.TIF')

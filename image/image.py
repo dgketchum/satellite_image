@@ -24,8 +24,8 @@ from fiona import open as fiopen
 from fiona.crs import from_epsg
 from tempfile import mkdtemp
 
-from bounds.bounds import RasterBounds
-from sat_image import mtl
+from image.bounds import RasterBounds
+from image import mtl
 
 
 class UnmatchedStackGeoError(ValueError):
