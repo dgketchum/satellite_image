@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
 Gives the cloud mask:
 
-<img src="docs/flathead_cloud_mask.png" alt="Drawing" style="width: 100px;"/>
+<img src="https:github.com/dgketchum/satellite_image/docs/flathead_cloud_mask.png" width="100">
 
 the shadow mask:
 
