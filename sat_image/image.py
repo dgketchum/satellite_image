@@ -24,8 +24,8 @@ from fiona import open as fiopen
 from fiona.crs import from_epsg
 from tempfile import mkdtemp
 
-from image.bounds import RasterBounds
-from image import mtl
+from sat_image.bounds import RasterBounds
+from sat_image import mtl
 
 
 class UnmatchedStackGeoError(ValueError):
@@ -46,7 +46,7 @@ class LandsatImage(object):
 
     def __init__(self, obj):
         ''' 
-        :param obj: Directory containing an unzipped Landsat 5, 7, or 8 image.  This should include at least
+        :param obj: Directory containing an unzipped Landsat 5, 7, or 8 sat_image.  This should include at least
         a tif for each band, and a .mtl file.
         '''
         self.obj = obj

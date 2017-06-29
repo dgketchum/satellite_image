@@ -92,3 +92,4 @@ ENV/
 .idea/modules.xml
 .idea/satellite_image.iml
 .idea/workspace.xml
+!/.travis.yml

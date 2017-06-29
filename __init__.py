@@ -15,7 +15,10 @@
 # =============================================================================================
 
 import os
+import sys
 
+cwd = os.getcwd()
+sys.path.insert(0, cwd)
 
 if __name__ == '__main__':
     home = os.path.expanduser('~')

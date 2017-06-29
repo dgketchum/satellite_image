@@ -36,7 +36,7 @@ import numpy as np
 
 class Fmask(object):
     ''' Implement fmask algorithm.
-    :param image: Landsat image stack LandsatImage object
+    :param image: Landsat sat_image stack LandsatImage object
     :return: fmask object
     '''
 
@@ -76,7 +76,7 @@ class Fmask(object):
 
 
         else:
-            raise ValueError('Must provide satellite image from LT5, LE7, LC8')
+            raise ValueError('Must provide satellite sat_image from LT5, LE7, LC8')
 
         for attr, code in zip(['code_null', 'code_clear', 'code_cloud',
                                'code_shadow', 'code_snow', 'code_water'],
@@ -594,7 +594,7 @@ class Fmask(object):
 
         # mystery, save pcloud here, shows no nan in qgis, save later, shows nan
         # outfile = '/data01/images/sandbox/pcloud.tif'
-        # georeference = self.image.rasterio_geometry
+        # georeference = self.sat_image.rasterio_geometry
         # array = pcloud
         # array = array.reshape(1, array.shape[0], array.shape[1])
         # array = np.array(array, dtype=georeference['dtype'])

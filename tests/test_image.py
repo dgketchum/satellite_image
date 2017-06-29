@@ -19,7 +19,7 @@ import unittest
 import numpy as np
 import rasterio
 
-from image.image import LandsatImage, Landsat5, Landsat7, Landsat8
+from sat_image.image import LandsatImage, Landsat5, Landsat7, Landsat8
 
 
 class LandsatImageTestCase(unittest.TestCase):
