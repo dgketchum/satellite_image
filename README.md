@@ -22,9 +22,51 @@ and get an object that full attributes, a bounding feature, and methods to retur
 
 Installation:
 
+```
+pip install satellite_image
+```
 
 Given this small section of a Landsat 7 image of the S. Flathead Lake and the 
 Mission Mountians in Montana, ETM+ band 5:
 
 # ![satellite_image](docs/flathead_b5.png)
 
+```
+import os
+import satellite_image
+
+def fmask(image_dir, outdir):
+
+    l7 = satellite_image.Landsat7(image_dir)
+    
+    f = Fmask(l7)
+    cloud, shadow, water = f.cloud_mask()
+    combo = f.cloud_mask(combined=True)
+    
+    mask.save_array(water, os.path.join(outdir, 'water_mask_l7.tif'))
+    mask.save_array(combo, os.path.join(outdir, 'combo_mask_l7.tif'))
+    
+    return None
+    
+if __name__ == '__main__':
+    out_directory = os.path.join('data', 'masks')
+    image_directory = os.path.join('data', 'images', 'LE70410272007125EDC00')
+    fmask(image_directory, out_directory)
+    
+```
+
+Gives the cloud mask:
+
+# ![satellite_image](docs/flathead_cloud_mask.png)
+
+the shadow mask:
+
+# ![satellite_image](docs/flathead_shadow_mask.png)
+
+the water mask:
+
+# ![satellite_image](docs/flathead_water_mask.png)
+
+or a combination of all masks, leaving `False` everywhere there is clear sky:
+
+# ![satellite_image](docs/flathead_combo_mask.png)
