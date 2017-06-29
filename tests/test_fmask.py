@@ -24,7 +24,7 @@ from sat_image.fmask import Fmask
 
 class FmaskTestCaseL5(unittest.TestCase):
     def setUp(self):
-        self.dirname_cloud = 'tests/data/fmask_test/lt5_fmask'
+        self.dirname_cloud = 'satellite_image/satellite_image/tests/data/fmask_test/lt5_fmask'
         self.image = Landsat5(self.dirname_cloud)
 
     def test_instantiate_fmask(self):
@@ -43,7 +43,7 @@ class FmaskTestCaseL5(unittest.TestCase):
 
 class FmaskTestCaseL7(unittest.TestCase):
     def setUp(self):
-        self.dirname_cloud = 'tests/data/fmask_test/le7_fmask'
+        self.dirname_cloud = 'satellite_image/satellite_image/tests/data/fmask_test/le7_fmask'
         self.image = Landsat7(self.dirname_cloud)
 
     def test_instantiate_fmask(self):
@@ -68,7 +68,7 @@ class FmaskTestCaseL7(unittest.TestCase):
 
 class FmaskTestCaseL8(unittest.TestCase):
     def setUp(self):
-        self.dirname_cloud = 'tests/data/fmask_test/lc8_fmask'
+        self.dirname_cloud = 'satellite_image/satellite_image/tests/data/fmask_test/lc8_fmask'
         self.image = Landsat8(self.dirname_cloud)
 
     def test_instantiate_fmask(self):

@@ -25,7 +25,9 @@ from sat_image.image import LandsatImage, Landsat5, Landsat7, Landsat8
 class LandsatImageTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.dir_name_LT5 = 'tests/data/image_test/lc8_image'
+        self.dir_name_LT5 = 'satellite_image/tests/data/image_test/lc8_image'
+        isdir = os.path.isdir(self.dir_name_LT5)
+        x = None
 
     def test_earth_sun(self):
         landsat = LandsatImage(self.dir_name_LT5)
