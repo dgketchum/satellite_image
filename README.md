@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
 Gives NDVI, or Normalized Density Vegetation Index:
 
-<img src="https://github.com/dgketchum/satellite_image/blob/master/docs/flathead_cloud_mask.png" width="800" />
+<img src="https://github.com/dgketchum/satellite_image/blob/master/docs/flathead_ndvi.png" width="800" />
 
 and so on...
 
