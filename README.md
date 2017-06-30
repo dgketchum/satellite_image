@@ -43,10 +43,10 @@ def fmask(image_dir, outdir):
     cloud, shadow, water = f.cloud_mask()
     combo = f.cloud_mask(combined=True)
     
-    mask.save_array(cloud, os.path.join(outdir, 'cloud_mask_l7.tif'))
-    mask.save_array(shadow, os.path.join(outdir, 'shadow_mask_l7.tif'))
-    mask.save_array(water, os.path.join(outdir, 'water_mask_l7.tif'))
-    mask.save_array(combo, os.path.join(outdir, 'combo_mask_l7.tif'))
+    f.save_array(cloud, os.path.join(outdir, 'cloud_mask_l7.tif'))
+    f.save_array(shadow, os.path.join(outdir, 'shadow_mask_l7.tif'))
+    f.save_array(water, os.path.join(outdir, 'water_mask_l7.tif'))
+    f.save_array(combo, os.path.join(outdir, 'combo_mask_l7.tif'))
     
     return None
     
@@ -86,7 +86,7 @@ def ndvi(image_dir, outdir):
     ndvi = l7.ndvi()
     date = l7.date_acquired
     date_str = datetime.datetime.strftime(landsat.date_acquired, '%Y%m%d')
-    mask.save_array(ndvi, os.path.join(outdir, 'ndvi_l7_{}.tif'.format(date_str)))
+    ndvi.save_array(ndvi, os.path.join(outdir, 'ndvi_l7_{}.tif'.format(date_str)))
     
     return None
     
