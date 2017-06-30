@@ -96,3 +96,12 @@ if __name__ == '__main__':
     fmask(image_directory, out_directory)
     
 ```
+
+Gives NDVI, or Normalized Density Vegetation Index:
+
+<img src="https://github.com/dgketchum/satellite_image/blob/master/docs/flathead_cloud_mask.png" width="800" />
+
+and so on...
+
+We're currently working on atmospheric corrections based on Tasumi (2008). Please
+contribute and make a pull request!
