@@ -192,8 +192,15 @@ class LandsatImage(object):
         geometry = self.rasterio_geometry
         array = array.reshape(1, array.shape[0], array.shape[1])
         geometry['dtype'] = array.dtype
-        with rasopen(output_filename, 'w', **geometry) as dst:
-            dst.write(array)
+        try:
+            with rasopen(output_filename, 'w', **geometry) as dst:
+                dst.write(array)
+        except TypeError:
+            print('Warning: this wont take float64, reverting to float32.')
+            geometry['dtype'] = float32
+            array = array.astype(float32)
+            with rasopen(output_filename, 'w', **geometry) as dst:
+                dst.write(array)
         return None
 
 
