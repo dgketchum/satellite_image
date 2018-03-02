@@ -37,9 +37,9 @@ import sat_image
 
 def fmask(image_dir, outdir):
 
-    l7 = satellite_image.Landsat7(image_dir)
+    l7 = sat_image.Landsat7(image_dir)
     
-    f = satellite_image.Fmask(l7)
+    f = sat_image.Fmask(l7)
     cloud, shadow, water = f.cloud_mask()
     combo = f.cloud_mask(combined=True)
     
@@ -81,7 +81,7 @@ import datetime
 
 def ndvi(image_dir, outdir):
 
-    l7 = satellite_image.Landsat7(image_dir)
+    l7 = sat_image.Landsat7(image_dir)
     
     ndvi = l7.ndvi()
     date = l7.date_acquired
