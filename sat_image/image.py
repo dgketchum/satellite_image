@@ -18,14 +18,15 @@
 import os
 import shutil
 from rasterio import open as rasopen
-from numpy import where, pi, cos, nan, inf, true_divide, errstate, log, nan_to_num
-from numpy import float32, sin, deg2rad
+from numpy import where, pi, cos, nan, inf, true_divide, errstate, log
+from numpy import float32, sin, deg2rad, array, isnan
 from shapely.geometry import Polygon, mapping
 from fiona import open as fiopen
 from fiona.crs import from_epsg
 from tempfile import mkdtemp
+from datetime import datetime
 
-from sat_image.bounds import RasterBounds
+from bounds import RasterBounds
 from sat_image import mtl
 
 
@@ -47,12 +48,14 @@ class LandsatImage(object):
 
     def __init__(self, obj):
         ''' 
-        :param obj: Directory containing an unzipped Landsat 5, 7, or 8 sat_image.  This should include at least
+        :param obj: Directory containing an unzipped Landsat 5, 7, or 8 image.  This should include at least
         a tif for each band, and a .mtl file.
         '''
         self.obj = obj
         if os.path.isdir(obj):
             self.isdir = True
+
+        self.date_acquired = None
 
         self.file_list = os.listdir(obj)
         self.tif_list = [x for x in os.listdir(obj) if x.endswith('.TIF')]
@@ -74,9 +77,7 @@ class LandsatImage(object):
         self.tif_dict = {}
         for i, tif in enumerate(self.tif_list):
             raster = os.path.join(self.obj, tif)
-            with rasopen(raster) as src:
-                affine = src.affine
-                profile = src.profile
+
             # set all lower case attributes
             tif = tif.lower()
             front_ind = tif.index('b')
@@ -88,13 +89,18 @@ class LandsatImage(object):
             self.band_count = i + 1
 
             if i == 0:
+                with rasopen(raster) as src:
+                    affine = src.affine
+                    profile = src.profile
                 # get rasterio metadata/geospatial reference for one tif
                 meta = src.meta.copy()
-                setattr(self, 'rasterio_geometry', meta)
+                self.rasterio_geometry = meta
+                self.profile = profile
+                self.transform = src.affine
                 bounds = RasterBounds(affine_transform=affine,
                                       profile=profile,
                                       latlon=False)
-                setattr(self, 'shape', src.shape)
+                self.bounds = bounds
                 self.north, self.west, self.south, self.east = bounds.get_nwse_tuple()
                 self.coords = bounds.as_tuple('nsew')
 
@@ -103,17 +109,32 @@ class LandsatImage(object):
         self.sun_elevation_rad = self.sun_elevation * pi / 180
         self.earth_sun_dist = self.earth_sun_d(self.date_acquired)
 
+        dtime = datetime.strptime(str(self.date_acquired), '%Y-%m-%d')
+        julian_day = dtime.strftime('%j')
+        self.doy = int(julian_day)
+        self.scene_coords_deg = self._scene_centroid()
+        self.scene_coords_rad = deg2rad(self.scene_coords_deg[0]), deg2rad(self.scene_coords_deg[1])
+
     def _get_band(self, band_str):
         path = self.tif_dict[band_str]
         with rasopen(path) as src:
-            return src.read(1)
+            arr = src.read(1)
+        arr = array(arr, dtype=float32)
+        arr[arr < 1.] = nan
+        return arr
 
-    def bool_mask(self):
+    def _scene_centroid(self):
+        """ Compute image center coordinates
+        :return: Tuple of image center in lat, lon
+        """
+        ul_lat = self.corner_ul_lat_product
+        ll_lat = self.corner_ll_lat_product
+        ul_lon = self.corner_ul_lon_product
+        ur_lon = self.corner_ur_lon_product
+        lat = (ul_lat + ll_lat) / 2.
+        lon = (ul_lon + ur_lon) / 2.
 
-        b1 = self._get_band('b1')
-        mask = where(b1 > 0, True, False)
-
-        return mask
+        return lat, lon
 
     @staticmethod
     def earth_sun_d(dtime):
@@ -133,7 +154,6 @@ class LandsatImage(object):
         with errstate(divide='ignore', invalid='ignore'):
             c = true_divide(a, b)
             c[c == inf] = replace
-            c = nan_to_num(c)
             return c
 
     def get_tile_geometry(self, output_filename=None, geographic_coords=False):
@@ -187,20 +207,34 @@ class LandsatImage(object):
 
                 return features
 
-    def save_array(self, array, output_filename):
+    def save_array(self, arr, output_filename):
         geometry = self.rasterio_geometry
-        array = array.reshape(1, array.shape[0], array.shape[1])
-        geometry['dtype'] = array.dtype
+        arr = arr.reshape(1, arr.shape[0], arr.shape[1])
+        geometry['dtype'] = arr.dtype
         try:
             with rasopen(output_filename, 'w', **geometry) as dst:
-                dst.write(array)
+                dst.write(arr)
         except TypeError:
             print('Warning: this wont take float64, reverting to float32.')
             geometry['dtype'] = float32
-            array = array.astype(float32)
+            arr = arr.astype(float32)
             with rasopen(output_filename, 'w', **geometry) as dst:
-                dst.write(array)
+                dst.write(arr)
         return None
+
+    def mask_by_image(self, arr):
+        image = self._get_band('b1')
+        image = array(image, dtype=float32)
+        image[image < 1.] = nan
+        arr = where(isnan(image), nan, arr)
+        return arr
+
+    def mask(self):
+        image = self._get_band('b1')
+        image = array(image, dtype=float32)
+        image[image < 1.] = nan
+        arr = where(isnan(image), 0, 1)
+        return arr
 
 
 class Landsat5(LandsatImage):
@@ -227,7 +261,7 @@ class Landsat5(LandsatImage):
         qcal = self._get_band('b{}'.format(band))
         rad = ((l_max - l_min) / (qcal_max - qcal_min)) * (qcal - qcal_min) + l_min
 
-        return rad
+        return rad.astype(float32)
 
     def brightness_temp(self, band, temp_scale='K'):
 
@@ -294,7 +328,8 @@ class Landsat5(LandsatImage):
         :return: boolean array
         """
         dn = self._get_band('b{}'.format(band))
-        mask = where((dn == value) & (self.bool_mask() > 0), True, False)
+        mask = self.mask()
+        mask = where((dn == value) & (mask > 0), True, False)
 
         return mask
 
@@ -306,6 +341,57 @@ class Landsat5(LandsatImage):
         ndvi = self._divide_zero((nir - red), (nir + red), nan)
 
         return ndvi
+
+    def lai(self):
+        """
+        Leaf area index (LAI), or the surface area of leaves to surface area ground.
+        Trezza and Allen, 2014
+        :param ndvi: normalized difference vegetation index [-]
+        :return: LAI [-]
+        """
+        ndvi = self.ndvi()
+        lai = 7.0 * (ndvi ** 3)
+        lai = where(lai > 6., 6., lai)
+        return lai
+
+    def emissivity(self, approach='tasumi'):
+
+        ndvi = self.ndvi()
+
+        if approach == 'tasumi':
+            lai = self.lai()
+            # Tasumi et al., 2003
+            # narrow-band emissivity
+            nb_epsilon = where((ndvi > 0) & (lai <= 3), 0.97 + 0.0033 * lai, nan)
+            nb_epsilon = where((ndvi > 0) & (lai > 3), 0.98, nb_epsilon)
+            nb_epsilon = where(ndvi <= 0, 0.99, nb_epsilon)
+            return nb_epsilon
+
+        if approach == 'sobrino':
+            # Sobrino et el., 2004
+            red = self.reflectance(3)
+            bound_ndvi = where(ndvi > 0.5, ndvi, 0.99)
+            bound_ndvi = where(ndvi < 0.2, red, bound_ndvi)
+
+            pv = ((ndvi - 0.2) / (0.5 - 0.2)) ** 2
+            pv_emiss = 0.004 * pv + 0.986
+            emissivity = where((ndvi >= 0.2) & (ndvi <= 0.5), pv_emiss, bound_ndvi)
+
+            return emissivity
+
+    def land_surface_temp(self):
+        """
+        Mean values from Allen (2007)
+        :return: 
+        """
+        rp = 0.91
+        tau = 0.866
+        rsky = 1.32
+        epsilon = self.emissivity(approach='tasumi')
+        radiance = self.radiance(6)
+        rc = ((radiance - rp) / tau) - ((1 - epsilon) * rsky)
+        lst = self.k2 / (log((epsilon * self.k1 / rc) + 1))
+        return lst
 
     def ndsi(self):
         """ Normalized difference snow index.
@@ -330,6 +416,8 @@ class Landsat7(LandsatImage):
         self.k1, self.k2 = 666.09, 1282.71
 
     def radiance(self, band):
+        if band == 6:
+            band = '6_vcid_1'
         qcal_min = getattr(self, 'quantize_cal_min_band_{}'.format(band))
         qcal_max = getattr(self, 'quantize_cal_max_band_{}'.format(band))
         l_min = getattr(self, 'radiance_minimum_band_{}'.format(band))
@@ -401,7 +489,7 @@ class Landsat7(LandsatImage):
         :return: boolean array
         """
         dn = self._get_band('b{}'.format(band))
-        mask = where((dn == value) & (self.bool_mask() > 0), True, False)
+        mask = where((dn == value) & (self.mask() > 0), True, False)
 
         return mask
 
@@ -413,6 +501,52 @@ class Landsat7(LandsatImage):
         ndvi = self._divide_zero((nir - red), (nir + red), nan)
 
         return ndvi
+
+    def lai(self):
+        """
+        Leaf area index (LAI), or the surface area of leaves to surface area ground.
+        Trezza and Allen, 2014
+        :param ndvi: normalized difference vegetation index [-]
+        :return: LAI [-]
+        """
+        ndvi = self.ndvi()
+        lai = 7.0 * (ndvi ** 3)
+        lai = where(lai > 6., 6., lai)
+        return lai
+
+    def emissivity(self, approach='tasumi'):
+
+        ndvi = self.ndvi()
+
+        if approach == 'tasumi':
+            lai = self.lai()
+            # Tasumi et al., 2003
+            # narrow-band emissivity
+            nb_epsilon = where((ndvi > 0) & (lai <= 3), 0.97 + 0.0033 * lai, nan)
+            nb_epsilon = where((ndvi > 0) & (lai > 3), 0.98, nb_epsilon)
+            nb_epsilon = where(ndvi <= 0, 0.99, nb_epsilon)
+            return nb_epsilon
+
+        if approach == 'sobrino':
+            # Sobrino et el., 2004
+            red = self.reflectance(3)
+            bound_ndvi = where(ndvi > 0.5, ndvi, 0.99)
+            bound_ndvi = where(ndvi < 0.2, red, bound_ndvi)
+
+            pv = ((ndvi - 0.2) / (0.5 - 0.2)) ** 2
+            pv_emiss = 0.004 * pv + 0.986
+            emissivity = where((ndvi >= 0.2) & (ndvi <= 0.5), pv_emiss, bound_ndvi)
+
+            return emissivity
+
+    def land_surface_temp(self):
+        rp = 0.91
+        tau = 0.866
+        rsky = 1.32
+        epsilon = self.emissivity()
+        rc = ((self.radiance(6) - rp) / tau) - ((1 - epsilon) * rsky)
+        lst = self.k2 / (log((epsilon * self.k1 / rc) + 1))
+        return lst
 
     def ndsi(self):
         """ Normalized difference snow index.
@@ -550,13 +684,13 @@ class Landsat8(LandsatImage):
         ml = getattr(self, 'radiance_mult_band_{}'.format(band))
         al = getattr(self, 'radiance_add_band_{}'.format(band))
         dn = self._get_band('b{}'.format(band))
-        rs = ml * dn.astype(float32) + al
+        rad = ml * dn.astype(float32) + al
 
-        return rs
+        return rad
 
     def albedo(self):
         """Smith (2010), finds broad-band surface reflectance (albedo)
-        Should have option for Liang, 2000; 
+        Should have option for Liang, 2000; Tasumi, 2008;
         
         LC8 toa reflectance bands 2, 4, 5, 6, 7
         
@@ -579,6 +713,58 @@ class Landsat8(LandsatImage):
 
         return ndvi
 
+    def lai(self):
+        """
+        Leaf area index (LAI), or the surface area of leaves to surface area ground.
+        Trezza and Allen, 2014
+        :param ndvi: normalized difference vegetation index [-]
+        :return: LAI [-]
+        """
+        ndvi = self.ndvi()
+        lai = 7.0 * (ndvi ** 3)
+        lai = where(lai > 6., 6., lai)
+        return lai
+
+    def emissivity(self, approach='tasumi'):
+
+        ndvi = self.ndvi()
+
+        if approach == 'tasumi':
+            lai = self.lai()
+            # Tasumi et al., 2003
+            # narrow-band emissivity
+            nb_epsilon = where((ndvi > 0) & (lai <= 3), 0.97 + 0.0033 * lai, nan)
+            nb_epsilon = where((ndvi > 0) & (lai > 3), 0.98, nb_epsilon)
+            nb_epsilon = where(ndvi <= 0, 0.99, nb_epsilon)
+            return nb_epsilon
+
+        if approach == 'sobrino':
+            # Sobrino et el., 2004
+            red = self.reflectance(3)
+            bound_ndvi = where(ndvi > 0.5, ndvi, 0.99)
+            bound_ndvi = where(ndvi < 0.2, red, bound_ndvi)
+
+            pv = ((ndvi - 0.2) / (0.5 - 0.2)) ** 2
+            pv_emiss = 0.004 * pv + 0.986
+            emissivity = where((ndvi >= 0.2) & (ndvi <= 0.5), pv_emiss, bound_ndvi)
+
+            return emissivity
+
+    def land_surface_temp(self):
+
+        band = 10
+
+        k1 = getattr(self, 'k1_constant_band_{}'.format(band))
+        k2 = getattr(self, 'k2_constant_band_{}'.format(band))
+
+        rp = 0.91
+        tau = 0.866
+        rsky = 1.32
+        epsilon = self.emissivity()
+        rc = ((self.radiance(band) - rp) / tau) - ((1 - epsilon) * rsky)
+        lst = k2 / (log((epsilon * k1 / rc) + 1))
+        return lst
+
     def ndsi(self):
         """ Normalized difference snow index.
         :return: NDSI
@@ -588,4 +774,4 @@ class Landsat8(LandsatImage):
 
         return ndsi
 
-# ========================================================================= ====================
+# =============================================================================================

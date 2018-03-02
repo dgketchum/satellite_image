@@ -59,7 +59,8 @@ class Landsat5TestCase(unittest.TestCase):
         self.assertTrue(self.l5.isdir)
         self.assertEqual(self.l5.mtl['L1_METADATA_FILE']['PRODUCT_METADATA']['FILE_NAME_BAND_1'],
                          'LT05_L1TP_040028_20060706_20160909_01_T1_B1.TIF')
-        self.assertEqual(self.l5.shape, (727, 727))
+        self.assertEqual((self.l5.profile['height'], self.l5.profile['width']),
+                          (727, 727))
         self.assertEqual(self.l5.utm_zone, 12)
         self.assertEqual(self.l5.ex_atm_irrad, (1958.0, 1827.0, 1551.0,
                                                 1036.0, 214.9, np.nan, 80.65))
@@ -67,8 +68,7 @@ class Landsat5TestCase(unittest.TestCase):
         self.assertEqual(self.l5.rasterio_geometry['height'], 727)
         self.assertEqual(self.l5.rasterio_geometry['driver'], 'GTiff')
         self.assertEqual(self.l5.rasterio_geometry['dtype'], 'uint16')
-        self.assertEqual(self.l5.rasterio_geometry['transform'], Affine(30.0, 0.0, 367035.0,
-                                                                        0.0, -30.0, 5082585.0))
+        self.assertEqual(self.l5.rasterio_geometry['transform'], (367035.0, 30.0, 0.0, 5082585.0, 0.0, -30.0))
 
     def test_reflectance(self):
         toa_reflect = self.l5.reflectance(1)[self.cell]
@@ -100,7 +100,7 @@ class Landsat5TestCase(unittest.TestCase):
         # inputs for self.cell toa reflect b 1, 3, 4, 5, 7
         l = [0.11047232299890863, 0.094736151248181175, 0.22708428311416637, 0.23499215186750311, 0.13805073521100206]
         exp_alb = (0.356 * l[0] + 0.130 * l[1] + 0.373 * l[2] + 0.085 * l[3] + 0.072 * l[4] - 0.0018) / 1.014
-        self.assertEqual(exp_alb, albedo)
+        self.assertAlmostEqual(exp_alb, albedo, delta=0.001)
 
     def test_saturation_mask(self):
         green_mask = self.l5.saturation_mask(2)
@@ -141,8 +141,7 @@ class Landsat7TestCase(unittest.TestCase):
         self.assertEqual(self.l7.rasterio_geometry['height'], 727)
         self.assertEqual(self.l7.rasterio_geometry['driver'], 'GTiff')
         self.assertEqual(self.l7.rasterio_geometry['dtype'], 'uint8')
-        self.assertEqual(self.l7.rasterio_geometry['transform'], Affine(30.0, 0.0, 367035.0,
-                                                                        0.0, -30.0, 5082585.0))
+        self.assertEqual(self.l7.rasterio_geometry['transform'], (367035.0, 30.0, 0.0, 5082585.0, 0.0, -30.0))
 
     def test_reflectance(self):
         toa_reflect = self.l7.reflectance(1)
@@ -166,7 +165,7 @@ class Landsat7TestCase(unittest.TestCase):
         # inputs for self.cell toa reflect b 1, 3, 4, 5, 7
         l = [0.30141704688299908, 0.26113788900694823, 0.37401738034983784, 0.15728264090788563, 0.11929144012910768]
         exp_alb = (0.356 * l[0] + 0.130 * l[1] + 0.373 * l[2] + 0.085 * l[3] + 0.072 * l[4] - 0.0018) / 1.014
-        self.assertEqual(exp_alb, albedo)
+        self.assertAlmostEqual(exp_alb, albedo, delta=0.001)
 
     def test_saturation_mask(self):
         green_mask = self.l7.saturation_mask(2)
@@ -210,8 +209,7 @@ class Landsat8TestCase(unittest.TestCase):
         self.assertEqual(l8.rasterio_geometry['height'], 727)
         self.assertEqual(l8.rasterio_geometry['driver'], 'GTiff')
         self.assertEqual(l8.rasterio_geometry['dtype'], 'uint16')
-        self.assertEqual(l8.rasterio_geometry['transform'], Affine(30.0, 0.0, 367035.0,
-                                                                   0.0, -30.0, 5082585.0))
+        self.assertEqual(l8.rasterio_geometry['transform'], (367035.0, 30.0, 0.0, 5082585.0, 0.0, -30.0))
 
     def test_toa_brightness(self):
         l8 = Landsat8(self.dirname_cloud)

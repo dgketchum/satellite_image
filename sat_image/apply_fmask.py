@@ -15,12 +15,23 @@
 # =============================================================================================
 
 import os
-import sys
 
-cwd = os.getcwd()
-sys.path.insert(0, cwd)
+from sat_image.image import LandsatImage
+
+from sat_image.fmask import Fmask
+
+
+def fmask(directory):
+    dirs = [os.path.join(directory, x) for x in os.listdir(directory)]
+    for d in dirs:
+        l = LandsatImage(d)
+        f = Fmask(l)
+        pass
 
 if __name__ == '__main__':
     home = os.path.expanduser('~')
+    top_level = os.path.join(home, 'images', 'irrigation',
+                             'MT', 'landsat', 'LC8_39_27')
+    fmask(top_level)
 
-# =============================================================================================
+# ========================= EOF ====================================================================

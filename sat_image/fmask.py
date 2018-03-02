@@ -36,47 +36,15 @@ import numpy as np
 
 class Fmask(object):
     ''' Implement fmask algorithm.
-    :param image: Landsat sat_image stack LandsatImage object
+    :param image: Landsat image stack LandsatImage object
     :return: fmask object
     '''
 
     def __init__(self, image):
 
         self.image = image
-        self.shape = image.shape
-        self.mask = image.bool_mask()
+        self.mask = image.mask()
         self.sat = image.satellite
-
-        if self.sat in ['LE7', 'LT5']:
-
-            self.blue = image.reflectance(1)
-            self.green = image.reflectance(2)
-            self.red = image.reflectance(3)
-            self.nir = image.reflectance(4)
-            self.swir1 = image.reflectance(5)
-            self.tirs1 = image.brightness_temp(6, temp_scale='C')
-            self.meantir = np.mean(self.tirs1)
-            self.swir2 = image.reflectance(7)
-
-            self.blue_saturated = image.saturation_mask(1)
-            self.green_saturated = image.saturation_mask(2)
-            self.red_saturated = image.saturation_mask(3)
-
-        elif self.sat == 'LC8':
-
-            self.blue = image.reflectance(2)
-            self.green = image.reflectance(3)
-            self.red = image.reflectance(4)
-            self.nir = image.reflectance(5)
-            self.swir1 = image.reflectance(6)
-            self.swir2 = image.reflectance(7)
-            self.cirrus = image.reflectance(9)
-            self.tirs1 = image.brightness_temp(10, 'C')
-            self.tirs2 = image.brightness_temp(11, 'C')
-
-
-        else:
-            raise ValueError('Must provide satellite sat_image from LT5, LE7, LC8')
 
         for attr, code in zip(['code_null', 'code_clear', 'code_cloud',
                                'code_shadow', 'code_snow', 'code_water'],
@@ -85,6 +53,53 @@ class Fmask(object):
 
         self.ndvi = image.ndvi()
         self.ndsi = image.ndsi()
+
+        self.lt5_le7_mapping = {'blue': 1,
+                                'green': 2,
+                                'red': 3,
+                                'nir': 4,
+                                'swir1': 5,
+                                'tirs1': 6,
+                                'swir2': 7}
+
+        self.lc8_mapping = {'blue': 2,
+                            'green': 3,
+                            'red': 4,
+                            'nir': 5,
+                            'swir1': 6,
+                            'swir2': 7,
+                            'cirrus': 9,
+                            'tirs1': 10,
+                            'tirs2': 11}
+
+    def _get_band(self, band='blue', saturation_mask=False):
+
+        def get_bandnumber(m):
+            try:
+                return m[band]
+            except KeyError:
+                print('Invalid band key: "{}". available key = {}'.format
+                      (band, ','.join(m.keys())))
+
+        if self.sat in ['LE7', 'LT5']:
+            band_number = get_bandnumber(self.lt5_le7_mapping)
+
+        elif self.sat == 'LC8':
+            if saturation_mask:
+                raise Warning('Saturation mask should only be applied to LT5 and LE7')
+            band_number = get_bandnumber(self.lc8_mapping)
+
+        else:
+            raise ValueError('Must provide satellite image from LT5, LE7, LC8')
+
+        if band_number is not None:
+            if saturation_mask:
+                return self.image.saturation_mask(band_number)
+            if band in ['tirs1', 'tirs2']:
+                return self.image.brightness_temp(band_number, temp_scale='C')
+            else:
+                return self.image.reflectance(band_number)
+
 
     def basic_test(self):
         """Fundamental test to identify Potential Cloud Pixels (PCPs)
@@ -110,8 +125,8 @@ class Fmask(object):
         th_ndvi = 0.8  # index
         th_tirs1 = 27.0  # degrees celsius
         th_swir2 = 0.03  # toa
-        return ((self.swir2 > th_swir2) &
-                (self.tirs1 < th_tirs1) &
+        return ((self._get_band('swir2') > th_swir2) &
+                (self._get_band('tirs1') < th_tirs1) &
                 (self.ndsi < th_ndsi) &
                 (self.ndvi < th_ndvi))
 
@@ -125,11 +140,11 @@ class Fmask(object):
         ndarray:
             whiteness index
         """
-        mean_vis = (self.blue + self.green + self.red) / 3
+        mean_vis = (self._get_band('blue') + self._get_band('green') + self._get_band('red')) / 3
 
-        blue_absdiff = np.absolute(self._divide_zero(self.blue - mean_vis, mean_vis))
-        green_absdiff = np.absolute(self._divide_zero(self.green - mean_vis, mean_vis))
-        red_absdiff = np.absolute(self._divide_zero(self.red - mean_vis, mean_vis))
+        blue_absdiff = np.absolute(self._divide_zero(self._get_band('blue') - mean_vis, mean_vis))
+        green_absdiff = np.absolute(self._divide_zero(self._get_band('green') - mean_vis, mean_vis))
+        red_absdiff = np.absolute(self._divide_zero(self._get_band('red') - mean_vis, mean_vis))
 
         return blue_absdiff + green_absdiff + red_absdiff
 
@@ -166,7 +181,7 @@ class Fmask(object):
         ndarray: boolean
         """
         thres = 0.08
-        return self.blue - (0.5 * self.red) - thres > 0.0
+        return self._get_band('blue') - (0.5 * self._get_band('red')) - thres > 0.0
 
     def nirswir_test(self):
         """Spectral test to exclude bright rock and desert
@@ -185,7 +200,7 @@ class Fmask(object):
         """
         th_ratio = 0.75
 
-        return (self.nir / self.swir1) > th_ratio
+        return (self._get_band('nir') / self._get_band('swir1')) > th_ratio
 
     def cirrus_test(self):
         """Cirrus TOA test, see (Zhu and Woodcock, 2015)
@@ -199,7 +214,7 @@ class Fmask(object):
         """
         th_cirrus = 0.0113
 
-        return self.cirrus > th_cirrus
+        return self._get_band('cirrus') > th_cirrus
 
     def water_test(self):
         """Water or Land?
@@ -217,12 +232,12 @@ class Fmask(object):
         th_ndvi_B = 0.1
         th_nir_B = 0.05
 
-        return (((self.ndvi < th_ndvi_A) & (self.nir < th_nir_A)) |
-                ((self.ndvi < th_ndvi_B) & (self.nir < th_nir_B)))
+        return (((self.ndvi < th_ndvi_A) & (self._get_band('nir') < th_nir_A)) |
+                ((self.ndvi < th_ndvi_B) & (self._get_band('nir') < th_nir_B)))
 
     def potential_cloud_pixels(self):
         """Determine potential cloud pixels (PCPs)
-        Combine basic spectral testsr to get a premliminary cloud mask
+        Combine basic spectral tests to get a premliminary cloud mask
         First pass, section 3.1.1 in Zhu and Woodcock 2012
         Equation 6 (Zhu and Woodcock, 2012)
         Parameters
@@ -269,10 +284,10 @@ class Fmask(object):
         # eq7
         th_swir2 = 0.03
         water = self.water_test()
-        clear_sky_water = water & (self.swir2 < th_swir2)
+        clear_sky_water = water & (self._get_band('swir2') < th_swir2)
 
         # eq8
-        clear_water_temp = self.tirs1.copy()
+        clear_water_temp = self._get_band('tirs1').copy()
         clear_water_temp[~clear_sky_water] = np.nan
         clear_water_temp[~self.mask] = np.nan
         pctl_clwt = np.nanpercentile(clear_water_temp, 82.5)
@@ -294,7 +309,7 @@ class Fmask(object):
         """
         temp_const = 4.0  # degrees C
         water_temp = self.temp_water()
-        return (water_temp - self.tirs1) / temp_const
+        return (water_temp - self._get_band('tirs1')) / temp_const
 
     def brightness_prob(self, clip=True):
         """The brightest water may have Band 5 reflectance
@@ -310,7 +325,7 @@ class Fmask(object):
             brightness probability, constrained 0..1
         """
         thresh = 0.11
-        bp = np.minimum(thresh, self.nir) / thresh
+        bp = np.minimum(thresh, self._get_band('nir')) / thresh
         if clip:
             bp[bp > 1] = 1
             bp[bp < 0] = 0
@@ -335,7 +350,7 @@ class Fmask(object):
         clearsky_land = ~(pcps | water)
 
         # use clearsky_land to mask tirs1
-        clear_land_temp = self.tirs1.copy()
+        clear_land_temp = self._get_band('tirs1').copy()
         clear_land_temp[~clearsky_land] = np.nan
         clear_land_temp[~self.mask] = np.nan
 
@@ -359,7 +374,7 @@ class Fmask(object):
             probability of cloud over land based on temperature
         """
         temp_diff = 4  # degrees
-        return (thigh + temp_diff - self.tirs1) / (thigh + 4 - (tlow - 4))
+        return (thigh + temp_diff - self._get_band('tirs1')) / (thigh + 4 - (tlow - 4))
 
     def variability_prob(self, whiteness):
         """Use the probability of the spectral variability
@@ -379,11 +394,15 @@ class Fmask(object):
         if self.sat in ['LT5', 'LE7']:
             # check for green and red saturation
 
+            green_sat = self._get_band('green', saturation_mask=True)
+            red_sat = self._get_band('red', saturation_mask=True)
+            
             # if red is saturated and less than nir, ndvi = 0
-            mod_ndvi = np.where(self.red_saturated & (self.nir > self.red), 0, self.ndvi)
-
+            mod_ndvi = np.where(red_sat & (self._get_band('nir') > self._get_band('red')), 0, self.ndvi)
+            
             # if green is saturated and less than swir1, ndsi = 0
-            mod_ndsi = np.where(self.green_saturated & (self.swir1 > self.green), 0, self.ndsi)
+            mod_ndsi = np.where(green_sat & (self._get_band('swir1') > self._get_band('green')), 0, self.ndsi)
+            
             ndi_max = np.fmax(np.absolute(mod_ndvi), np.absolute(mod_ndsi))
 
         else:
@@ -454,10 +473,14 @@ class Fmask(object):
         # change water threshold to dynamic, line 132 in Zhu, 2015 todo
         part1 = (pcp & water & (water_cloud_prob > water_threshold))
         part2 = (pcp & ~water & (land_cloud_prob > land_threshold))
-        temptest = self.tirs1 < (tlow - 35)  # 35degrees C colder
+        temptest = self._get_band('tirs1') < (tlow - 35)  # 35degrees C colder
 
         if self.sat in ['LT5', 'LE7']:
-            saturation = self.blue_saturated | self.green_saturated | self.red_saturated
+
+            blue_sat = self._get_band('blue', saturation_mask=True)
+            green_sat = self._get_band('green', saturation_mask=True)
+            red_sat = self._get_band('red', saturation_mask=True)
+            saturation = blue_sat | green_sat | red_sat
 
             return part1 | part2 | temptest | saturation
 
@@ -478,7 +501,7 @@ class Fmask(object):
         ndarray
             boolean, potential cloud shadows
         """
-        return (self.nir < 0.10) & (self.swir1 < 0.10) & ~water
+        return (self._get_band('nir') < 0.10) & (self._get_band('swir1') < 0.10) & ~water
 
     def potential_snow_layer(self):
         """Spectral test to determine potential snow
@@ -494,9 +517,11 @@ class Fmask(object):
         ndarray:
             boolean, True is potential snow
         """
-        return (self.ndsi > 0.15) & (self.tirs1 < 9.85) & (self.nir > 0.11) & (self.green > 0.1)
+        return (self.ndsi > 0.15) & (self._get_band('tirs1') < 9.85) & (self._get_band('nir') > 0.11) & (
+        self._get_band('green') > 0.1)
 
-    def cloud_mask(self, min_filter=(3, 3), max_filter=(10, 10), combined=False):
+    def cloud_mask(self, min_filter=(3, 3), max_filter=(40, 40),
+                   combined=False, clear_value=0, output_file=None):
         """Calculate the potential cloud layer from source data
         *This is the high level function which ties together all
         the equations for generating potential clouds*
@@ -522,7 +547,7 @@ class Fmask(object):
         ndarray, boolean
             potential cloud shadow layer; True = cloud shadow
         """
-        # logger.info("Running initial testsr")
+        # logger.info("Running initial tests")
         whiteness = self.whiteness_index()
         water = self.water_test()
 
@@ -530,7 +555,7 @@ class Fmask(object):
         pcps = self.potential_cloud_pixels()
 
         if self.sat == 'LC8':
-            cirrus_prob = self.cirrus / 0.04
+            cirrus_prob = self._get_band('cirrus') / 0.04
         else:
             cirrus_prob = 0.0
 
@@ -539,12 +564,15 @@ class Fmask(object):
         bp = self.brightness_prob()
         water_cloud_prob = (wtp * bp) + cirrus_prob
         wthreshold = 0.5
+        wtp = None
 
         # Clouds over land
         tlow, thigh = self.temp_land(pcps, water)
         ltp = self.land_temp_prob(tlow, thigh)
         vp = self.variability_prob(whiteness)
+        whiteness = None
         land_cloud_prob = (ltp * vp) + cirrus_prob
+        vp = None
         lthreshold = self.land_threshold(land_cloud_prob, pcps, water)
 
         # logger.info("Calculate potential clouds")
@@ -552,6 +580,9 @@ class Fmask(object):
             pcps, water, tlow,
             land_cloud_prob, lthreshold,
             water_cloud_prob, wthreshold)
+        pcps = None
+        water_cloud_prob = None
+        land_cloud_prob = None
 
         # Ignoring snow for now as it exhibits many false positives and negatives
         # when used as a binary mask
@@ -594,22 +625,45 @@ class Fmask(object):
 
         # mystery, save pcloud here, shows no nan in qgis, save later, shows nan
         # outfile = '/data01/images/sandbox/pcloud.tif'
-        # georeference = self.sat_image.rasterio_geometry
+        # georeference = self.image.rasterio_geometry
         # array = pcloud
         # array = array.reshape(1, array.shape[0], array.shape[1])
         # array = np.array(array, dtype=georeference['dtype'])
         # with rasterio.open(outfile, 'w', **georeference) as dst:
         #     dst.write(array)
         # mystery test
-        if combined:
-            return pcloud | pshadow | water
 
-        return pcloud, pshadow, water
+        if clear_value == 0:
+
+            if combined:
+                combo = pcloud | pshadow | water
+                if output_file:
+                    self.save_array(combo, outfile=output_file)
+                    return combo
+                else:
+                    return combo
+
+            return pcloud, pshadow, water
+
+        elif clear_value == 1:
+
+            if combined:
+                combo = pcloud | pshadow | water
+                if output_file:
+                    self.save_array(~combo, outfile=output_file)
+                    return ~combo
+                else:
+                    return ~combo
+
+            return ~pcloud, ~pshadow, ~water
+
+        else:
+            raise ValueError('Cloud/shadow/water areas must be 0 or 1.')
 
     def save_array(self, array, outfile):
         georeference = self.image.rasterio_geometry
-        georeference['dtype'] = array.dtype
         array = array.reshape(1, array.shape[0], array.shape[1])
+        array = np.array(array, dtype=georeference['dtype'])
         with rasterio.open(outfile, 'w', **georeference) as dst:
             dst.write(array)
         return None
