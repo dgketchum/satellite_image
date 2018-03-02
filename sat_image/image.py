@@ -75,7 +75,7 @@ class LandsatImage(object):
         for i, tif in enumerate(self.tif_list):
             raster = os.path.join(self.obj, tif)
             with rasopen(raster) as src:
-                transform = src.transform
+                affine = src.affine
                 profile = src.profile
             # set all lower case attributes
             tif = tif.lower()
@@ -91,7 +91,7 @@ class LandsatImage(object):
                 # get rasterio metadata/geospatial reference for one tif
                 meta = src.meta.copy()
                 setattr(self, 'rasterio_geometry', meta)
-                bounds = RasterBounds(affine_transform=transform,
+                bounds = RasterBounds(affine_transform=affine,
                                       profile=profile,
                                       latlon=False)
                 setattr(self, 'shape', src.shape)
