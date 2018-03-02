@@ -20,25 +20,26 @@ from setuptools import setup
 
 os.environ['TRAVIS_CI'] = 'True'
 
-tag = '0.1'
+tag = '0.1.1'
 name = 'satellite_image'
 
 setup(name=name,
       version=tag,
       description='Simple API provides a class to process satellite images',
       setup_requires=[],
-      py_modules=None,
+      py_modules=['sat_image'],
       license='Apache', classifiers=[
         'Development Status :: 1 - Planning',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: GIS',
         'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5'],
       keywords='landsat modis hydrology remote sensing energy balance',
       author='David Ketchum',
       author_email='dgketchum@gmail.com',
       platforms='Posix; MacOS X; Windows',
-      packages=None,
+      packages=['sat_image'],
       download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', name, tag),
       url='https://github.com/dgketchum',
       test_suite='tests.test_suite.suite', install_requires=None,

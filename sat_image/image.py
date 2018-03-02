@@ -26,7 +26,7 @@ from fiona.crs import from_epsg
 from tempfile import mkdtemp
 from datetime import datetime
 
-from bounds import RasterBounds
+from sat_image.bounds import RasterBounds
 from sat_image import mtl
 
 
