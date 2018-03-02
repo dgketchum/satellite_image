@@ -20,7 +20,7 @@ from setuptools import setup
 
 os.environ['TRAVIS_CI'] = 'True'
 
-tag = '0.0.1'
+tag = '0.1'
 name = 'satellite_image'
 
 setup(name=name,

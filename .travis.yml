@@ -40,7 +40,7 @@ script:
 
 
 notifications:
-  slack: nmbgmr:6025BpWw62bzddqVqFrtGLOF
+  slack: nasa-roses-et:xJ8aulox7UZrK27kWwOmwlzR
 
 after_success:
   - codecov
