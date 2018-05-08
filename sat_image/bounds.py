@@ -24,8 +24,16 @@ class BBox(object):
 
     def to_web_mercator(self):
         in_proj = Proj({'init': 'epsg:3857'})
-        w, n = in_proj(self.west, self.north)
-        e, s = in_proj(self.east, self.south)
+        w, s = in_proj(self.west, self.south)
+        e, n = in_proj(self.east, self.north)
+
+        return w, s, e, n
+
+    def to_mt_sp(self):
+        in_proj = Proj('+proj=lcc +lat_1=45 +lat_2=49 +lat_0=44.25 +'
+                       'lon_0=-109.5 +x_0=600000 +y_0=LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF +ellps=GRS80 +units=m +no_defs')
+        w, s = in_proj(self.west, self.south)
+        e, n = in_proj(self.east, self.north)
 
         return w, s, e, n
 
@@ -38,13 +46,12 @@ class GeoBounds(BBox):
      
     """
 
-    def __init__(self, west_lon=-126.0, south_lat=22.0, east_lon=-64.0,
-                 north_lat=53.0):
+    def __init__(self, west=-126.0, south=22.0, east=-64.0, north=53.0):
         BBox.__init__(self)
-        self.west = west_lon
-        self.south = south_lat
-        self.east = east_lon
-        self.north = north_lat
+        self.west = west
+        self.south = south
+        self.east = east
+        self.north = north
 
 
 class RasterBounds(BBox):

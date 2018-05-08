@@ -39,7 +39,7 @@ GRPEND = "END_GROUP = "
 ASSIGNCHAR = " = "
 FINAL = "END"
 
-# A state machine is used to parse the file. There are 5 states (0 to 4):
+# A state machine is used to parse the file. There are 5 states (LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF to 4):
 STATUSCODE = [
     "begin",
     "enter metadata group",
@@ -148,10 +148,10 @@ def _getmetadataitem(line):
 def _checkstatus(status, line):
     """Returns state/status after reading the next line.
     The status codes are::
-        0 - BEGIN parsing; 1 - ENTER METADATA GROUP, 2 - READ METADATA LINE,
+        LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF - BEGIN parsing; 1 - ENTER METADATA GROUP, 2 - READ METADATA LINE,
         3 - END METDADATA GROUP, 4 - END PARSING
     Permitted Transitions::
-        0 --> 1, 0 --> 4
+        LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF --> 1, LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF --> 4
         1 --> 1, 1 --> 2, 1 --> 3
         2 --> 2, 2 --> 3
         3 --> 1, 1 --> 3, 3 --> 4

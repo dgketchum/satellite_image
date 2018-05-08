@@ -1,7 +1,7 @@
 # =============================================================================================
 # Copyright 2017 dgketchum
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -23,6 +23,7 @@ from shapely.geometry import Polygon, mapping
 from fiona import open as fiopen
 from fiona.crs import from_epsg
 from tempfile import mkdtemp
+from datetime import date
 
 from sat_image.bounds import RasterBounds
 from sat_image import mtl
@@ -55,7 +56,11 @@ class LandsatImage(object):
 
         self.file_list = os.listdir(obj)
         self.tif_list = [x for x in os.listdir(obj) if x.endswith('.TIF')]
+        self.masks = [os.path.join(obj, x) for x in os.listdir(obj) if x.endswith('mask.tif')]
         self.tif_list.sort()
+
+        self.sun_elevation = None
+        self.date_acquired = None
 
         # parse metadata file into attributes
         # structure: {HEADER: {SUBHEADER: {key(attribute), val(attribute value)}}}
@@ -74,7 +79,7 @@ class LandsatImage(object):
         for i, tif in enumerate(self.tif_list):
             raster = os.path.join(self.obj, tif)
             with rasopen(raster) as src:
-                transform = src.transform
+                transform = src.meta['transform']
                 profile = src.profile
             # set all lower case attributes
             tif = tif.lower()
@@ -102,6 +107,7 @@ class LandsatImage(object):
         self.sun_elevation_rad = self.sun_elevation * pi / 180
         self.earth_sun_dist = self.earth_sun_d(self.date_acquired)
 
+        self.date_acquired_str = date.strftime(self.date_acquired, '%Y%m%d')
 
     def _get_band(self, band_str):
         path = self.tif_dict[band_str]
@@ -208,7 +214,7 @@ class Landsat5(LandsatImage):
                              1036.0, 214.9, nan, 80.65)
 
         # old values from fmask.exe
-        # self.ex_atm_irrad = (1983.0, 1796.0, 1536.0, 1031.0, 220.0, nan, 83.44)
+        # self.ex_atm_irrad = (1983.LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF, 1796.LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF, 1536.LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF, 1031.LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF, 220.LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF, nan, 83.44)
 
         self.k1, self.k2 = 607.76, 1260.56
 
@@ -261,7 +267,7 @@ class Landsat5(LandsatImage):
         
         Smith (2010),  “The heat budget of the earth’s surface deduced from space”
         LT5 toa reflectance bands 1, 3, 4, 5, 7
-        # normalized i.e. 0.356 + 0.130 + 0.373 + 0.085 + 0.07 = 1.014
+        # normalized i.e. LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.356 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.130 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.373 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.085 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.07 = 1.014
         
         Should have option for Liang, 2000; 
         
@@ -378,7 +384,7 @@ class Landsat7(LandsatImage):
         
         LE7 toa reflectance bands 1, 3, 4, 5, 7
         
-        # normalized i.e. 0.356 + 0.130 + 0.373 + 0.085 + 0.07 = 1.014
+        # normalized i.e. LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.356 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.130 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.373 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.085 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.07 = 1.014
         :return albedo array of floats
         """
         blue, red, nir, swir1, swir2 = (self.reflectance(1), self.reflectance(3), self.reflectance(4),
@@ -553,7 +559,7 @@ class Landsat8(LandsatImage):
         
         LC8 toa reflectance bands 2, 4, 5, 6, 7
         
-        # normalized i.e. 0.356 + 0.130 + 0.373 + 0.085 + 0.07 = 1.014
+        # normalized i.e. LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.356 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.130 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.373 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.085 + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.07 = 1.014
         :return albedo array of floats
         """
 

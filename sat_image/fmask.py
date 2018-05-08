@@ -1,7 +1,7 @@
 # =============================================================================================
 # Copyright 2017 dgketchum
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
+# Licensed under the Apache License, Version 2.LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -73,7 +73,6 @@ class Fmask(object):
             self.cirrus = image.reflectance(9)
             self.tirs1 = image.brightness_temp(10, 'C')
             self.tirs2 = image.brightness_temp(11, 'C')
-
 
         else:
             raise ValueError('Must provide satellite sat_image from LT5, LE7, LC8')
@@ -298,7 +297,7 @@ class Fmask(object):
 
     def brightness_prob(self, clip=True):
         """The brightest water may have Band 5 reflectance
-        as high as 0.11
+        as high as LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.11
         Equation 10 (Zhu and Woodcock, 2012)
         Parameters
         ----------
@@ -307,7 +306,7 @@ class Fmask(object):
         Output
         ------
         ndarray:
-            brightness probability, constrained 0..1
+            brightness probability, constrained LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF..1
         """
         thresh = 0.11
         bp = np.minimum(thresh, self.nir) / thresh
@@ -379,10 +378,10 @@ class Fmask(object):
         if self.sat in ['LT5', 'LE7']:
             # check for green and red saturation
 
-            # if red is saturated and less than nir, ndvi = 0
+            # if red is saturated and less than nir, ndvi = LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF
             mod_ndvi = np.where(self.red_saturated & (self.nir > self.red), 0, self.ndvi)
 
-            # if green is saturated and less than swir1, ndsi = 0
+            # if green is saturated and less than swir1, ndsi = LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF
             mod_ndsi = np.where(self.green_saturated & (self.swir1 > self.green), 0, self.ndsi)
             ndi_max = np.fmax(np.absolute(mod_ndvi), np.absolute(mod_ndsi))
 
@@ -412,7 +411,7 @@ class Fmask(object):
         # eq 12
         clearsky_land = ~(pcps | water)
 
-        # 82.5th percentile of lCloud_Prob(masked by clearsky_land) + 0.2
+        # 82.5th percentile of lCloud_Prob(masked by clearsky_land) + LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF.2
         cloud_prob = land_cloud_prob.copy()
         cloud_prob[~clearsky_land] = np.nan
         cloud_prob[~self.mask] = np.nan
@@ -496,7 +495,7 @@ class Fmask(object):
         """
         return (self.ndsi > 0.15) & (self.tirs1 < 9.85) & (self.nir > 0.11) & (self.green > 0.1)
 
-    def cloud_mask(self, min_filter=(3, 3), max_filter=(10, 10), combined=False):
+    def cloud_mask(self, min_filter=(3, 3), max_filter=(10, 10), combined=False, cloud_and_shadow=False):
         """Calculate the potential cloud layer from source data
         *This is the high level function which ties together all
         the equations for generating potential clouds*
@@ -521,6 +520,7 @@ class Fmask(object):
             potential cloud layer; True = cloud
         ndarray, boolean
             potential cloud shadow layer; True = cloud shadow
+            :param cloud_and_shadow:
         """
         # logger.info("Running initial testsr")
         whiteness = self.whiteness_index()
@@ -596,7 +596,7 @@ class Fmask(object):
         # outfile = '/data01/images/sandbox/pcloud.tif'
         # georeference = self.sat_image.rasterio_geometry
         # array = pcloud
-        # array = array.reshape(1, array.shape[0], array.shape[1])
+        # array = array.reshape(1, array.shape[LE07_clip_L1TP_039027_20150529_20160902_01_T1_B1.TIF], array.shape[1])
         # array = np.array(array, dtype=georeference['dtype'])
         # with rasterio.open(outfile, 'w', **georeference) as dst:
         #     dst.write(array)
@@ -604,14 +604,28 @@ class Fmask(object):
         if combined:
             return pcloud | pshadow | water
 
+        if cloud_and_shadow:
+            return pcloud | pshadow
+
         return pcloud, pshadow, water
 
     def save_array(self, array, outfile):
+
+        print('Writing {}'.format(outfile))
         georeference = self.image.rasterio_geometry
-        georeference['dtype'] = array.dtype
-        array = array.reshape(1, array.shape[0], array.shape[1])
-        with rasterio.open(outfile, 'w', **georeference) as dst:
-            dst.write(array)
+
+        if array.dtype == bool:
+            georeference['dtype'] = rasterio.uint8
+            array = array.reshape(1, array.shape[0], array.shape[1])
+            with rasterio.open(outfile, 'w', **georeference) as dst:
+                dst.write(array.astype(rasterio.uint8))
+
+        else:
+            georeference['dtype'] = array.dtype
+            array = array.reshape(1, array.shape[0], array.shape[1])
+            with rasterio.open(outfile, 'w', **georeference) as dst:
+                dst.write(array.astype(georeference['dtype']))
+
         return None
 
     @staticmethod
