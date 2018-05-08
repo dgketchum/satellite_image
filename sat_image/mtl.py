@@ -58,7 +58,7 @@ class MTLParseError(Exception):
 
 
 def parsemeta(metadataloc):
-    """Parses the metadata from a Landsat sat_image bundle.
+    """Parses the metadata from a Landsat image bundle.
     
     Arguments:
         metadataloc: a filename or a directory.

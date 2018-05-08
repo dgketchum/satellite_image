@@ -33,13 +33,13 @@ Mission Mountians in Montana, ETM+ band 5:
 
 ```
 import os
-import satellite_image
+import sat_image
 
 def fmask(image_dir, outdir):
 
-    l7 = satellite_image.Landsat7(image_dir)
+    l7 = sat_image.Landsat7(image_dir)
     
-    f = satellite_image.Fmask(l7)
+    f = sat_image.Fmask(l7)
     cloud, shadow, water = f.cloud_mask()
     combo = f.cloud_mask(combined=True)
     
@@ -76,12 +76,12 @@ or a combination of all masks, leaving `0` everywhere there is clear sky:
 
 ```
 import os
-import satellite_image
+import sat_image
 import datetime
 
 def ndvi(image_dir, outdir):
 
-    l7 = satellite_image.Landsat7(image_dir)
+    l7 = sat_image.Landsat7(image_dir)
     
     ndvi = l7.ndvi()
     date = l7.date_acquired
