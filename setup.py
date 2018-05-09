@@ -16,14 +16,20 @@
 
 import os
 
+os.environ['TRAVIS_CI'] = 'True'
 
 try:
     from setuptools import setup
 
+    # setup_kwargs = {'entry_points': {'console_scripts': ['sat_image=sat_image.landsat_cli:cli_runner']}}
 except ImportError:
+
     from distutils.core import setup
 
-os.environ['TRAVIS_CI'] = 'True'
+    # setup_kwargs = {'scripts': ['bin/sat_image/landsat_cli']}
+
+with open('README.md') as f:
+    readme = f.read()
 
 tag = '0.0.1'
 name = 'SatelliteImage'
@@ -33,22 +39,23 @@ setup(name=name,
       description='Simple API provides a class to process satellite images',
       setup_requires=['nose>=1.0'],
       py_modules=['sat_image'],
-      license='Apache', classifiers=[
-        'Development Status :: 1 - Planning',
-        'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering :: GIS',
-        'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 2.7'],
-      keywords='landsat hydrology remote sensing energy balance',
+      license='Apache',
+      classifiers=[
+          'Development Status :: 3 - Alpha',
+          'Intended Audience :: Science/Research',
+          'Topic :: Scientific/Engineering :: GIS',
+          'License :: OSI Approved :: Apache Software License',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.6'],
+      keywords='landsat download hydrology remote sensing',
       author='David Ketchum',
       author_email='dgketchum@gmail.com',
       platforms='Posix; MacOS X; Windows',
-      packages=['sat_image'],
-      download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', name, tag),
+      packages=['landsat'],
+      download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', 'Landsat578', tag),
       url='https://github.com/dgketchum',
-      test_suite='tests.test_suite.suite', install_requires=None,
-      entry_points=None
-      )
+      test_suite='tests.test_suite.suite',
+      install_requires=['numpy', 'rasterio==1.0a12', 'shapely', 'fiona', 'pyproj'])
+# **setup_kwargs)
 
 # ============= EOF ===========================================================================
