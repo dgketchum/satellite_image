@@ -59,8 +59,8 @@ class Landsat5TestCase(unittest.TestCase):
         self.assertTrue(self.l5.isdir)
         self.assertEqual(self.l5.mtl['L1_METADATA_FILE']['PRODUCT_METADATA']['FILE_NAME_BAND_1'],
                          'LT05_L1TP_040028_20060706_20160909_01_T1_B1.TIF')
-        self.assertEqual((self.l5.profile['height'], self.l5.profile['width']),
-                          (727, 727))
+        self.assertEqual((self.l5.rasterio_geometry['height'], self.l5.rasterio_geometry['width']),
+                         (727, 727))
         self.assertEqual(self.l5.utm_zone, 12)
         self.assertEqual(self.l5.ex_atm_irrad, (1958.0, 1827.0, 1551.0,
                                                 1036.0, 214.9, np.nan, 80.65))
@@ -68,7 +68,7 @@ class Landsat5TestCase(unittest.TestCase):
         self.assertEqual(self.l5.rasterio_geometry['height'], 727)
         self.assertEqual(self.l5.rasterio_geometry['driver'], 'GTiff')
         self.assertEqual(self.l5.rasterio_geometry['dtype'], 'uint16')
-        self.assertEqual(self.l5.rasterio_geometry['transform'], (367035.0, 30.0, 0.0, 5082585.0, 0.0, -30.0))
+        self.assertEqual(self.l5.rasterio_geometry['transform'], Affine(30.0, 0.0, 367035.0, 0.0, -30.0, 5082585.0))
 
     def test_reflectance(self):
         toa_reflect = self.l5.reflectance(1)[self.cell]
@@ -141,7 +141,8 @@ class Landsat7TestCase(unittest.TestCase):
         self.assertEqual(self.l7.rasterio_geometry['height'], 727)
         self.assertEqual(self.l7.rasterio_geometry['driver'], 'GTiff')
         self.assertEqual(self.l7.rasterio_geometry['dtype'], 'uint8')
-        self.assertEqual(self.l7.rasterio_geometry['transform'], (367035.0, 30.0, 0.0, 5082585.0, 0.0, -30.0))
+        self.assertEqual(self.l7.rasterio_geometry['transform'], Affine(30.0, 0.0, 367035.0,
+                                                                        0.0, -30.0, 5082585.0))
 
     def test_reflectance(self):
         toa_reflect = self.l7.reflectance(1)
@@ -181,9 +182,9 @@ class Landsat7TestCase(unittest.TestCase):
         b4, b3 = self.l7.reflectance(4)[self.cell], self.l7.reflectance(3)[self.cell]
         ndvi_exp = (b4 - b3) / (b4 + b3)
         self.assertEqual(ndvi_cell, ndvi_exp)
-        home = os.path.expanduser('~')
-        outdir = os.path.join(home, 'images', 'sandbox')
-        self.l7.save_array(ndvi, os.path.join(outdir, 'ndvi.tif'))
+        # home = os.path.expanduser('~')
+        # outdir = os.path.join(home, 'images', 'sandbox')
+        # self.l7.save_array(ndvi, os.path.join(outdir, 'ndvi.tif'))
 
     def test_ndsi(self):
         ndsi = self.l7.ndsi()[self.cell]
@@ -209,7 +210,8 @@ class Landsat8TestCase(unittest.TestCase):
         self.assertEqual(l8.rasterio_geometry['height'], 727)
         self.assertEqual(l8.rasterio_geometry['driver'], 'GTiff')
         self.assertEqual(l8.rasterio_geometry['dtype'], 'uint16')
-        self.assertEqual(l8.rasterio_geometry['transform'], (367035.0, 30.0, 0.0, 5082585.0, 0.0, -30.0))
+        self.assertEqual(l8.rasterio_geometry['transform'], Affine(30.0, 0.0, 367035.0,
+                                                                   0.0, -30.0, 5082585.0))
 
     def test_toa_brightness(self):
         l8 = Landsat8(self.dirname_cloud)
@@ -259,6 +261,5 @@ class Landsat8TestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
 
 # ===============================================================================
