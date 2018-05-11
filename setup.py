@@ -54,7 +54,7 @@ setup(name=name,
       download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', 'Landsat578', tag),
       url='https://github.com/dgketchum',
       test_suite='tests.test_suite.suite',
-      install_requires=['numpy', 'rasterio==1.0a12', 'shapely', 'fiona', 'pyproj'])
+      install_requires=['numpy', 'rasterio==1.0a12', 'shapely', 'fiona', 'pyproj', 'scipy'])
 # **setup_kwargs)
 
 # ============= EOF ===========================================================================

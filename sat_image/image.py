@@ -50,6 +50,7 @@ class LandsatImage(object):
         :param obj: Directory containing an unzipped Landsat 5, 7, or 8 sat_image.  This should include at least
         a tif for each band, and a .mtl file.
         '''
+
         self.obj = obj
         if os.path.isdir(obj):
             self.isdir = True
@@ -94,7 +95,7 @@ class LandsatImage(object):
             if i == 0:
                 # get rasterio metadata/geospatial reference for one tif
                 meta = src.meta.copy()
-                setattr(self, 'rasterio_geometry', meta)
+                self.rasterio_geometry = meta
                 bounds = RasterBounds(affine_transform=transform,
                                       profile=profile,
                                       latlon=False)
