@@ -76,14 +76,14 @@ def parsemeta(metadataloc):
                 % metadataloc)
         elif len(metalist) > 0:
             metadatafn = metalist[0]
-            filehandle = open(metadatafn, 'rU')
+            filehandle = open(metadatafn, 'r')
             if len(metalist) > 1:
                 logging.warning(
                     "More than one file in directory match metadata "
                     + "file pattern. Using %s." % metadatafn)
     elif os.path.isfile(metadataloc):
         metadatafn = metadataloc
-        filehandle = open(metadatafn, 'rU')
+        filehandle = open(metadatafn, 'r')
         logging.info("Using file %s." % metadatafn)
     elif 'L1_METADATA_FILE' in metadataloc:
         filehandle = StringIO(metadataloc)
