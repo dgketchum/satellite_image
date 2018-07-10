@@ -23,7 +23,7 @@ and get an object that full attributes, a bounding feature, and methods to retur
 Installation:
 
 ```
-pip install satellite_image
+pip install SatelliteImage
 ```
 
 Given this small section of a Landsat 7 image of the S. Flathead Lake and the 
@@ -33,26 +33,29 @@ Mission Mountians in Montana, ETM+ band 5:
 
 ```
 import os
-import sat_image
+
+from sat_image.image import Landsat7
+from sat_image.fmask import Fmask
+
 
 def fmask(image_dir, outdir):
+    l7 = Landsat7(image_dir)
 
-    l7 = sat_image.Landsat7(image_dir)
-    
-    f = sat_image.Fmask(l7)
+    f = Fmask(l7)
     cloud, shadow, water = f.cloud_mask()
     combo = f.cloud_mask(combined=True)
-    
+
     f.save_array(cloud, os.path.join(outdir, 'cloud_mask_l7.tif'))
     f.save_array(shadow, os.path.join(outdir, 'shadow_mask_l7.tif'))
     f.save_array(water, os.path.join(outdir, 'water_mask_l7.tif'))
     f.save_array(combo, os.path.join(outdir, 'combo_mask_l7.tif'))
-    
+
     return None
-    
+
+
 if __name__ == '__main__':
-    out_directory = os.path.join('data', 'masks')
     image_directory = os.path.join('data', 'images', 'LE70410272007125EDC00')
+    out_directory = os.path.join('data', 'masks')
     fmask(image_directory, out_directory)
     
 ```
@@ -76,20 +79,22 @@ or a combination of all masks, leaving `0` everywhere there is clear sky:
 
 ```
 import os
-import sat_image
 import datetime
 
-def ndvi(image_dir, outdir):
+from sat_image.image import Landsat7
 
-    l7 = sat_image.Landsat7(image_dir)
-    
+
+def ndvi(image_dir, outdir):
+    l7 = Landsat7(image_dir)
+
     ndvi = l7.ndvi()
     date = l7.date_acquired
-    date_str = datetime.datetime.strftime(landsat.date_acquired, '%Y%m%d')
+    date_str = datetime.datetime.strftime(date, '%Y%m%d')
     ndvi.save_array(ndvi, os.path.join(outdir, 'ndvi_l7_{}.tif'.format(date_str)))
-    
+
     return None
-    
+
+
 if __name__ == '__main__':
     out_directory = os.path.join('data', 'ndvi')
     image_directory = os.path.join('data', 'images', 'LE70410272007125EDC00')
