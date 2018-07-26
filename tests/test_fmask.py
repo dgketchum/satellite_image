@@ -18,8 +18,6 @@ import os
 import unittest
 from numpy import count_nonzero
 
-import sys
-print(sys.path)
 from sat_image.image import Landsat5, Landsat7, Landsat8
 from sat_image.fmask import Fmask
 
