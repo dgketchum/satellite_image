@@ -27,7 +27,7 @@ from sat_image.band_map import BandMap
 from sat_image.image import Landsat5, Landsat7, Landsat8, LandsatImage
 
 
-def warp_vrt(directory, delete_extra=False, use_band_map=False):
+def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False):
     """ Read in image geometry, resample subsequent images to same grid.
 
     The purpose of this function is to snap many Landsat images to one geometry. Use Landsat578
@@ -38,6 +38,10 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False):
     :param directory: A directory containing sub-directories of Landsat images.
     :return: None
     """
+    if 'resample_meta.txt' in os.listdir(directory) and not overwrite:
+        print('{} has already had component images warped')
+        return None
+
     mapping = {'LC8': Landsat8, 'LE7': Landsat7, 'LT5': Landsat5}
 
     vrt_options = {}
