@@ -39,7 +39,7 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False)
     :return: None
     """
     if 'resample_meta.txt' in os.listdir(directory) and not overwrite:
-        print('{} has already had component images warped')
+        print('{} has already had component images warped'.format(directory))
         return None
 
     mapping = {'LC8': Landsat8, 'LE7': Landsat7, 'LT5': Landsat5}
