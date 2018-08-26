@@ -121,7 +121,12 @@ class LandsatImage(object):
         mask = where(b1 > 0, True, False)
 
         return mask
-
+    
+    def mask_by_image(self, arr):
+        mask = self.bool_mask()
+        arr = where(mask > 0., arr, nan)
+        return arr
+    
     @staticmethod
     def earth_sun_d(dtime):
         """ Earth-sun distance in AU
