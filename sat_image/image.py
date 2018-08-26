@@ -91,11 +91,14 @@ class LandsatImage(object):
                 with rasopen(raster) as src:
                     transform = src.transform
                     profile = src.profile
+                    affine = src.affine
                 # get rasterio metadata/geospatial reference for one tif
                 meta = src.meta.copy()
                 self.rasterio_geometry = meta
                 self.profile = profile
-                self.transform = src.transform
+                self.transform = transform
+                self.affine = affine
+
                 bounds = RasterBounds(affine_transform=transform,
                                       profile=profile,
                                       latlon=False)
