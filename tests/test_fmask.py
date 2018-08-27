@@ -21,10 +21,12 @@ from numpy import count_nonzero
 from sat_image.image import Landsat5, Landsat7, Landsat8
 from sat_image.fmask import Fmask
 
+DATA = os.path.join(os.path.dirname(__file__), 'data')
+
 
 class FmaskTestCaseL5(unittest.TestCase):
     def setUp(self):
-        self.dirname_cloud = 'satellite_image/tests/data/fmask_test/lt5_fmask'
+        self.dirname_cloud = os.path.join(DATA, 'fmask_test', 'lt5_fmask')
         self.image = Landsat5(self.dirname_cloud)
 
     def test_instantiate_fmask(self):
@@ -43,7 +45,7 @@ class FmaskTestCaseL5(unittest.TestCase):
 
 class FmaskTestCaseL7(unittest.TestCase):
     def setUp(self):
-        self.dirname_cloud = 'satellite_image/tests/data/fmask_test/le7_fmask'
+        self.dirname_cloud = os.path.join(DATA, 'fmask_test', 'le7_fmask')
         self.image = Landsat7(self.dirname_cloud)
 
     def test_instantiate_fmask(self):
@@ -67,7 +69,7 @@ class FmaskTestCaseL7(unittest.TestCase):
 
 class FmaskTestCaseL8(unittest.TestCase):
     def setUp(self):
-        self.dirname_cloud = 'satellite_image/tests/data/fmask_test/lc8_fmask'
+        self.dirname_cloud = os.path.join(DATA, 'fmask_test', 'lc8_fmask')
         self.image = Landsat8(self.dirname_cloud)
 
     def test_instantiate_fmask(self):
@@ -92,8 +94,3 @@ if __name__ == '__main__':
     unittest.main()
 
 # ===============================================================================
-# home = os.path.expanduser('~')
-# outdir = os.path.join(home, 'images', 'sandbox')
-# f.save_array(cloud, os.path.join(outdir, 'cloud_mask_l8.tif'))
-# f.save_array(shadow, os.path.join(outdir, 'shadow_mask_l8.tif'))
-# f.save_array(water, os.path.join(outdir, 'water_mask_l8.tif'))

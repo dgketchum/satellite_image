@@ -44,7 +44,7 @@ class Fmask(object):
 
         self.image = image
         self.shape = image.shape
-        self.mask = image.bool_mask()
+        self.mask = image.mask()
         self.sat = image.satellite
 
         if self.sat in ['LE7', 'LT5']:
