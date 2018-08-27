@@ -97,6 +97,7 @@ class LandsatImage(object):
                 self.profile = profile
                 self.transform = transform
                 self.affine = affine
+                self.shape = (1, profile['height'], profile['width'])
 
                 bounds = RasterBounds(affine_transform=transform,
                                       profile=profile,
