@@ -25,7 +25,7 @@ from fiona.crs import from_epsg
 from tempfile import mkdtemp
 from datetime import datetime
 
-from sat_image.bounds import RasterBounds
+from bounds import RasterBounds
 from sat_image import mtl
 
 
@@ -92,7 +92,6 @@ class LandsatImage(object):
                     transform = src.transform
                     profile = src.profile
                     affine = src.affine
-                # get rasterio metadata/geospatial reference for one tif
                 meta = src.meta.copy()
                 self.rasterio_geometry = meta
                 self.profile = profile

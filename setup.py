@@ -31,7 +31,7 @@ except ImportError:
 with open('README.md') as f:
     readme = f.read()
 
-tag = '0.1.23'
+tag = '0.1.24'
 name = 'SatelliteImage'
 
 setup(name=name,
@@ -51,8 +51,10 @@ setup(name=name,
       author_email='dgketchum@gmail.com',
       platforms='Posix; MacOS X; Windows',
       packages=['sat_image'],
-      download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum', 'Landsat578', tag),
-      url='https://github.com/dgketchum',
+      download_url='https://github.com/{}/{}/archive/{}.tar.gz'.format('dgketchum',
+                                                                       'satellite_image',
+                                                                       tag),
+      url='https://github.com/dgketchum/satellite_image',
       test_suite='tests.test_suite.suite',
       install_requires=['numpy', 'rasterio==1.0a12', 'shapely', 'fiona', 'pyproj', 'scipy'])
 # **setup_kwargs)
