@@ -57,9 +57,12 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
             for x in os.listdir(root):
 
                 if remove_bqa and x.endswith('BQA.TIF'):
-                    os.remove(x)
+                    try:
+                        os.remove(x)
+                    except FileNotFoundError:
+                        pass
 
-                if use_band_map:
+                elif use_band_map:
                     bands = BandMap().selected
                     for y in bands[sat]:
                         if x.endswith('B{}.TIF'.format(y)):
