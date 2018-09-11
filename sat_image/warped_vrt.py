@@ -46,12 +46,12 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
 
     vrt_options = {}
     list_dir = [x[0] for x in os.walk(directory) if os.path.basename(x[0])[:3] in mapping.keys()]
-
+    extras = [os.path.join(directory, x) for x in os.listdir(directory) if x.endswith('.tif')]
     first = True
 
     for d in list_dir:
         sat = LandsatImage(d).satellite
-        paths = []
+        paths = extras
         root = os.path.join(directory, d)
         if os.path.isdir(root):
             for x in os.listdir(root):
@@ -119,6 +119,25 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
                         print('removing {}'.format(x_file))
                         os.remove(x_file)
 
+
+def warp_single_image(image_path, profile):
+
+    vrt_options = {'resampling': Resampling.cubic,
+                   'dst_crs': profile['crs'],
+                   'dst_transform': profile['transform'],
+                   'dst_height': profile['height'],
+                   'dst_width': profile['width']}
+
+    with rasopen(image_path, 'r') as src:
+        with WarpedVRT(src, **vrt_options) as vrt:
+            data = vrt.read()
+            dst_dir, name = os.path.split(image_path)
+            outfile = os.path.join(dst_dir, name)
+            meta = vrt.meta.copy()
+            meta['driver'] = 'GTiff'
+            with rasopen(outfile, 'w', **meta) as dst:
+                dst.write(data)
+            return data
 
 if __name__ == '__main__':
     home = os.path.expanduser('~')
