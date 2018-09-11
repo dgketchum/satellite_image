@@ -31,7 +31,7 @@ except ImportError:
 with open('README.md') as f:
     readme = f.read()
 
-tag = '0.1.26'
+tag = '0.1.27'
 name = 'SatelliteImage'
 
 setup(name=name,
