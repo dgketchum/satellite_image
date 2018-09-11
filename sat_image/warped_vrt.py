@@ -27,7 +27,7 @@ from sat_image.band_map import BandMap
 from sat_image.image import Landsat5, Landsat7, Landsat8, LandsatImage
 
 
-def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False):
+def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False, remove_bqa=True):
     """ Read in image geometry, resample subsequent images to same grid.
 
     The purpose of this function is to snap many Landsat images to one geometry. Use Landsat578
@@ -55,14 +55,19 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False)
         root = os.path.join(directory, d)
         if os.path.isdir(root):
             for x in os.listdir(root):
+
+                if remove_bqa and x.endswith('BQA.TIF'):
+                    os.remove(x)
+
                 if use_band_map:
                     bands = BandMap().selected
                     for y in bands[sat]:
                         if x.endswith('B{}.TIF'.format(y)):
                             paths.append(os.path.join(directory, d, x))
                 else:
-                    if x.endswith('.TIF'):
+                    if x.endswith('.TIF') or x.endswith('.tif'):
                         paths.append(os.path.join(directory, d, x))
+
                 if x.endswith('MTL.txt'):
                     mtl = os.path.join(directory, d, x)
 
