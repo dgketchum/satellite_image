@@ -33,6 +33,8 @@ from __future__ import print_function, division
 import rasterio
 import numpy as np
 
+np.warnings.filterwarnings('ignore')
+
 
 class Fmask(object):
     ''' Implement fmask algorithm.
@@ -421,7 +423,7 @@ class Fmask(object):
         return np.nanpercentile(cloud_prob, 82.5) + th_const
 
     def potential_cloud_layer(self, pcp, water, tlow, land_cloud_prob, land_threshold,
-                              water_cloud_prob, water_threshold=0.5):
+            water_cloud_prob, water_threshold=0.5):
         """Final step of determining potential cloud layer
         Equation 18 (Zhu and Woodcock, 2012)
         
