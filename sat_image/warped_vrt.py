@@ -123,10 +123,10 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
 def warp_single_image(image_path, profile):
 
     vrt_options = {'resampling': Resampling.cubic,
-                   'dst_crs': profile['crs'],
-                   'dst_transform': profile['transform'],
-                   'dst_height': profile['height'],
-                   'dst_width': profile['width']}
+                   'crs': profile['crs'],
+                   'transform': profile['transform'],
+                   'height': profile['height'],
+                   'width': profile['width']}
 
     with rasopen(image_path, 'r') as src:
         with WarpedVRT(src, **vrt_options) as vrt:
