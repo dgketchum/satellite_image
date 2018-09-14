@@ -91,12 +91,10 @@ class LandsatImage(object):
                 with rasopen(raster) as src:
                     transform = src.transform
                     profile = src.profile
-                    affine = src.affine
                 meta = src.meta.copy()
                 self.rasterio_geometry = meta
                 self.profile = profile
                 self.transform = transform
-                self.affine = affine
                 self.shape = (1, profile['height'], profile['width'])
 
                 bounds = RasterBounds(affine_transform=transform,
