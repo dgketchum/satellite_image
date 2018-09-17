@@ -79,7 +79,7 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
             landsat = mapping[sat](os.path.join(directory, d))
             dst = landsat.rasterio_geometry
 
-            vrt_options = {'resampling': Resampling.cubic,
+            vrt_options = {'resampling': Resampling.nearest,
                            'dst_crs': dst['crs'],
                            'dst_transform': dst['transform'],
                            'dst_height': dst['height'],
@@ -122,7 +122,7 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
 
 def warp_single_image(image_path, profile):
 
-    vrt_options = {'resampling': Resampling.cubic,
+    vrt_options = {'resampling': Resampling.nearest,
                    'crs': profile['crs'],
                    'transform': profile['transform'],
                    'height': profile['height'],
