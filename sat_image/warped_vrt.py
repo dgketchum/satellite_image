@@ -120,9 +120,14 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
                         os.remove(x_file)
 
 
-def warp_single_image(image_path, profile):
+def warp_single_image(image_path, profile, resampling='cubic'):
 
-    vrt_options = {'resampling': Resampling.nearest,
+    if resampling == 'cubic':
+        resample = Resampling.cubic
+    if resampling == 'nearest':
+        resample = Resampling.nearest
+
+    vrt_options = {'resampling': resample,
                    'crs': profile['crs'],
                    'transform': profile['transform'],
                    'height': profile['height'],
