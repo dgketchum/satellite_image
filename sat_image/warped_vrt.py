@@ -137,7 +137,7 @@ def warp_single_image(image_path, profile, resampling='cubic'):
                    'transform': profile['transform'],
                    'height': profile['height'],
                    'width': profile['width']}
-
+    print('warp single image {}'.format(image_path))
     with rasopen(image_path, 'r') as src:
         with WarpedVRT(src, **vrt_options) as vrt:
             data = vrt.read()
@@ -145,9 +145,9 @@ def warp_single_image(image_path, profile, resampling='cubic'):
             outfile = os.path.join(dst_dir, name)
             meta = vrt.meta.copy()
             meta['driver'] = 'GTiff'
-            with rasopen(outfile, 'w', **meta) as dst:
-                dst.write(data)
-            return data
+    with rasopen(outfile, 'w', **meta) as dst:
+        dst.write(data)
+    return data
 
 if __name__ == '__main__':
     pass
