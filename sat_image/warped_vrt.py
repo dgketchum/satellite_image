@@ -150,8 +150,6 @@ def warp_single_image(image_path, profile, resampling='cubic'):
             return data
 
 if __name__ == '__main__':
-    home = os.path.expanduser('~')
-    images = os.path.join(home, 'landsat_images', 'vrt_testing')
-    warp_vrt(images, delete_extra=True, use_band_map=True)
+    pass
 
 # ========================= EOF ================================================================
