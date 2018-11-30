@@ -27,7 +27,8 @@ from sat_image.band_map import BandMap
 from sat_image.image import Landsat5, Landsat7, Landsat8, LandsatImage
 
 
-def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False, remove_bqa=True, resample='cubic'):
+def warp_vrt(directory, delete_extra=False, use_band_map=False,
+             overwrite=False, remove_bqa=True, return_profile=False):
     """ Read in image geometry, resample subsequent images to same grid.
 
     The purpose of this function is to snap many Landsat images to one geometry. Use Landsat578
@@ -41,11 +42,6 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
     if 'resample_meta.txt' in os.listdir(directory) and not overwrite:
         print('{} has already had component images warped'.format(directory))
         return None
-
-    if resample == 'cubic':
-        resample = Resampling.cubic
-    if resample == 'nearest':
-        resample = Resampling.nearest
 
     mapping = {'LC8': Landsat8, 'LE7': Landsat7, 'LT5': Landsat5}
 
@@ -84,7 +80,7 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
             landsat = mapping[sat](os.path.join(directory, d))
             dst = landsat.rasterio_geometry
 
-            vrt_options = {'resampling': resample,
+            vrt_options = {'resampling': Resampling.nearest,
                            'dst_crs': dst['crs'],
                            'dst_transform': dst['transform'],
                            'dst_height': dst['height'],
@@ -124,20 +120,17 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False, overwrite=False,
                         print('removing {}'.format(x_file))
                         os.remove(x_file)
 
+    if return_profile:
+        return dst
 
-def warp_single_image(image_path, profile, resampling='cubic'):
+def warp_single_image(image_path, profile):
 
-    if resampling == 'cubic':
-        resample = Resampling.cubic
-    if resampling == 'nearest':
-        resample = Resampling.nearest
-
-    vrt_options = {'resampling': resample,
+    vrt_options = {'resampling': Resampling.nearest,
                    'crs': profile['crs'],
                    'transform': profile['transform'],
                    'height': profile['height'],
                    'width': profile['width']}
-    print('warp single image {}'.format(image_path))
+
     with rasopen(image_path, 'r') as src:
         with WarpedVRT(src, **vrt_options) as vrt:
             data = vrt.read()
@@ -145,11 +138,13 @@ def warp_single_image(image_path, profile, resampling='cubic'):
             outfile = os.path.join(dst_dir, name)
             meta = vrt.meta.copy()
             meta['driver'] = 'GTiff'
-    with rasopen(outfile, 'w', **meta) as dst:
-        dst.write(data)
-    return data
+            with rasopen(outfile, 'w', **meta) as dst:
+                dst.write(data)
+            return data
 
 if __name__ == '__main__':
-    pass
+    home = os.path.expanduser('~')
+    images = os.path.join(home, 'landsat_images', 'vrt_testing')
+    warp_vrt(images, delete_extra=True, use_band_map=True)
 
 # ========================= EOF ================================================================
