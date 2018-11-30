@@ -39,6 +39,7 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False,
     :param directory: A directory containing sub-directories of Landsat images.
     :return: None
     """
+
     if 'resample_meta.txt' in os.listdir(directory) and not overwrite:
         print('{} has already had component images warped'.format(directory))
         return None
@@ -96,8 +97,6 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False,
                 f.write(message)
             first = False
 
-        os.rename(mtl, mtl.replace('.txt', 'copy.txt'))
-
         for tif_path in paths:
             print('warping {}'.format(os.path.basename(tif_path)))
             with rasopen(tif_path, 'r') as src:
@@ -109,8 +108,6 @@ def warp_vrt(directory, delete_extra=False, use_band_map=False,
                     meta['driver'] = 'GTiff'
                     with rasopen(outfile, 'w', **meta) as dst:
                         dst.write(data)
-
-        os.rename(mtl.replace('.txt', 'copy.txt'), mtl)
 
         if delete_extra:
             for x in os.listdir(os.path.join(directory, d)):
@@ -144,7 +141,5 @@ def warp_single_image(image_path, profile):
 
 if __name__ == '__main__':
     home = os.path.expanduser('~')
-    images = os.path.join(home, 'landsat_images', 'vrt_testing')
-    warp_vrt(images, delete_extra=True, use_band_map=True)
-
+    pass
 # ========================= EOF ================================================================
